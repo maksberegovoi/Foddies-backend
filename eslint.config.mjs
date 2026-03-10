@@ -6,7 +6,7 @@ export default tseslint.config(
     ...tseslint.configs.recommended,
 
     {
-        ignores: ['dist', 'node_modules']
+        ignores: ['dist', 'node_modules', 'src/prisma/seed.ts']
     },
 
     {

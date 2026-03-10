@@ -1,5 +1,6 @@
 import prisma from '../../prisma'
 import { type CreateUserDto } from './schemas/create-user.schema'
+
 import type { UserDto } from './dto/user.dto'
 
 class UserService {

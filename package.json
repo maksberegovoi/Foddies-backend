@@ -24,7 +24,7 @@
         "prepare": "husky"
     },
     "prisma": {
-        "seed": "ts-node --transpile-only src/prisma/seed.ts"
+        "seed": "node --loader ts-node/esm src/prisma/seed.ts"
     },
     "lint-staged": {
         "*.{ts,js}": [
