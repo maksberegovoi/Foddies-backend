@@ -7,7 +7,17 @@ import errorHandlerMiddleware from './shared/http/middlewares/error-handler.midd
 
 const app = express()
 
-app.use(cors())
+console.log(env.CORS_ALLOWED_ORIGINS)
+
+app.use(
+    cors({
+        origin: env.CORS_ALLOWED_ORIGINS,
+        credentials: true
+        // TODO: uncomment and update list of allowed methods and headers before presentation
+        // methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        // allowedHeaders: ['Content-Type', 'Authorization']
+    })
+)
 app.use(express.json())
 app.use('/api/v1', router)
 
