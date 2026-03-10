@@ -1,7 +1,7 @@
 import { type ErrorRequestHandler } from 'express'
 import { ZodError } from 'zod'
-import ApiError from '../errors/api.error'
 import { Prisma } from '@prisma/client'
+import ApiError from '../errors/api.error'
 
 const errorHandlerMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
     const errorResponse = {
@@ -40,6 +40,10 @@ const errorHandlerMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
             case 'P2002':
                 status = 409
                 message = 'Record already exists'
+                break
+            case 'P2003':
+                status = 409
+                message = 'Restricted operation'
                 break
             case 'P2025':
                 status = 404

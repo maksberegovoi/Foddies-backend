@@ -1,14 +1,94 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model User {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  name  String
+  id        String  @id @default(cuid())
+  email     String  @unique
+  password  String
+  name      String
+  avatarURL String?
+
+  recipes         Recipe[] @relation("UserRecipes")
+  favoriteRecipes Recipe[] @relation("UserFavorites")
+  followers       User[]   @relation("UserFollows")
+  following       User[]   @relation("UserFollows")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Recipe {
+  id           String @id @default(cuid())
+  title        String
+  description  String
+  instructions String
+  time         Int
+  imageURL     String
+
+  favoritedBy User[]             @relation("UserFavorites")
+  ingredients RecipeIngredient[]
+
+  owner      User     @relation("UserRecipes", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId    String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  categoryId String
+  area       Area     @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  areaId     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([categoryId])
+  @@index([areaId])
+  @@index([title])
+}
+
+model Category {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
+}
+
+model Area {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
+}
+
+model Ingredient {
+  id          String             @id @default(cuid())
+  name        String             @unique
+  description String
+  imageURL    String
+  recipes     RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId     String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  ingredientId String
+  measure      String
+
+  @@id([recipeId, ingredientId])
+  @@index([recipeId])
+  @@index([ingredientId])
+}
+
+model Testimonial {
+  id    String @id @default(cuid())
+  owner String
+  text  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
