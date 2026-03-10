@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
+import { initDb } from './prisma.js'
 import router from './router.js'
 import { env } from './env'
 import errorHandlerMiddleware from './shared/http/middlewares/error-handler.middleware'
@@ -16,6 +17,7 @@ app.use(errorHandlerMiddleware)
 
 const start = async () => {
     try {
+        await initDb()
         app.listen(env.PORT, () => {
             console.log(`SERVER WAS STARTED ON PORT ${env.PORT}`)
         })
