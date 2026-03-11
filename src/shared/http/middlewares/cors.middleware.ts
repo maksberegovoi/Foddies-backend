@@ -4,7 +4,6 @@ import { env } from '../../../env'
 
 const originsSchema = z
     .string()
-    .min(1, 'CORS_ALLOWED_ORIGINS is not defined')
     .transform((val) => {
         const trimmed = val.trim()
         if (trimmed === '*') return '*'
@@ -16,7 +15,6 @@ const originsSchema = z
         }
         return trimmed
     })
-    .default('*')
     .pipe(
         z.union([
             z.literal('*'),
@@ -26,7 +24,7 @@ const originsSchema = z
     )
 
 export const corsMiddleware = cors({
-    origin: originsSchema.parse(env.CORS_ALLOWED_ORIGINS),
+    origin: originsSchema.parse(env.CORS_ALLOWED_ORIGINS || '*'),
     credentials: true
     // TODO: uncomment and update list of allowed methods and headers before presentation
     // methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
