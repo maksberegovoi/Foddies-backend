@@ -2,29 +2,15 @@ import cors from 'cors'
 import { z } from 'zod'
 import { env } from '../../../env'
 
-const originsSchema = z
-    .string()
-    .transform((val) => {
-        const trimmed = val.trim()
-        if (trimmed === '*') return '*'
-        if (trimmed.includes(',')) {
-            return trimmed
-                .split(',')
-                .map((url) => url.trim())
-                .filter(Boolean)
-        }
-        return trimmed
-    })
-    .pipe(
-        z.union([
-            z.literal('*'),
-            z.url('Invalid URL in CORS_ALLOWED_ORIGINS'),
-            z.array(z.url('Invalid URL in CORS_ALLOWED_ORIGINS'))
-        ])
-    )
+const parseOrigins = (originsRaw: string) => {
+    if (originsRaw.trim() === '*') return '*'
+    return originsRaw
+        .split(',')
+        .map((url) => z.url('Invalid CORS origin URL').parse(url.trim()))
+}
 
 export const corsMiddleware = cors({
-    origin: originsSchema.parse(env.CORS_ALLOWED_ORIGINS || '*'),
+    origin: parseOrigins(env.CORS_ALLOWED_ORIGINS),
     credentials: true
     // TODO: uncomment and update list of allowed methods and headers before presentation
     // methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
