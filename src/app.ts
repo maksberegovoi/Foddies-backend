@@ -1,13 +1,13 @@
 import 'dotenv/config'
 import express from 'express'
-import cors from 'cors'
 import router from './router.js'
 import { env } from './env'
 import errorHandlerMiddleware from './shared/http/middlewares/error-handler.middleware'
+import { corsMiddleware } from './shared/http/middlewares/cors.middleware.js'
 
 const app = express()
 
-app.use(cors())
+app.use(corsMiddleware)
 app.use(express.json())
 app.use('/api/v1', router)
 
