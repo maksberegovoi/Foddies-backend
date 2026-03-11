@@ -1,14 +1,20 @@
-import type { Ingredient } from '@prisma/client'
 import prisma from '../../prisma'
+import type { ingredientsDto } from './dto/ingreient.dto.ts'
 
-export const getIngredients = async (): Promise<Ingredient[]> => {
-    return await prisma.ingredient.findMany({
-        orderBy: {
-            name: 'asc'
-        }
-    })
+class IngredientService {
+    async getIngredients(): Promise<ingredientsDto[]> {
+        return await prisma.ingredient.findMany({
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                imageURL: true
+            },
+            orderBy: {
+                name: 'asc'
+            }
+        })
+    }
 }
 
-export default {
-    getIngredients
-}
+export default IngredientService

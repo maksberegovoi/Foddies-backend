@@ -1,18 +1,20 @@
-import ApiError from '../../shared/http/errors/api.error'
-import ingredientsService from './ingredients.service'
 import type { ApiResponse } from '../../shared/http/types/api-response.interface'
-import type { Ingredient } from '@prisma/client'
 import { type Request, type Response } from 'express'
+import IngredientService from './ingredients.service'
+import type { ingredientsDto } from './dto/ingreient.dto'
 
-export const getIngredientsController = async (
-    req: Request,
-    res: Response<ApiResponse<Ingredient[]>>
-) => {
-    const result = await ingredientsService.getIngredients()
+class IngredientController {
+    constructor(private readonly ingredientsService: IngredientService) {}
+    getIngredients = async (
+        req: Request,
+        res: Response<ApiResponse<ingredientsDto[]>>
+    ) => {
+        const ingredient = await this.ingredientsService.getIngredients()
 
-    if (!result || result.length === 0) {
-        throw ApiError.badRequest('Ingredients not found in the database')
+        res.json({ data: ingredient })
     }
-
-    res.json({ data: result })
 }
+
+export const ingredientController = new IngredientController(
+    new IngredientService()
+)
