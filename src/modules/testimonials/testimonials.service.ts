@@ -3,7 +3,7 @@ import { type TestimonialDto } from './dto/testimonials.dto'
 
 class TestimonialsService {
     async getTestimonials(
-        page: number,
+        page: number = 1,
         limit: number = 10
     ): Promise<TestimonialDto[]> {
         const skip = (page - 1) * limit

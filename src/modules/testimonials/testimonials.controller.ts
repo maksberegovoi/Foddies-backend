@@ -2,6 +2,10 @@ import type { ApiResponse } from '../../shared/http/types/api-response.interface
 import { type Request, type Response } from 'express'
 import TestimonialsService from './testimonials.service'
 import type { TestimonialDto } from './dto/testimonials.dto'
+import {
+    limitSchema,
+    pageSchema
+} from '../../shared/http/schemas/pagination.schema'
 
 class TestimonialsController {
     constructor(private readonly testimonialsService: TestimonialsService) {}
@@ -9,14 +13,15 @@ class TestimonialsController {
         req: Request,
         res: Response<ApiResponse<TestimonialDto[]>>
     ) => {
-        const page = Number(req.query.page) || 1
-        const limit = Number(req.query.limit) || 10
-        const testimonial = await this.testimonialsService.getTestimonials(
+        const { page } = pageSchema.parse(req.query)
+        const { limit } = limitSchema.parse(req.query)
+
+        const testimonials = await this.testimonialsService.getTestimonials(
             page,
             limit
         )
 
-        res.json({ data: testimonial || [] })
+        res.json({ data: testimonials })
     }
 }
 
