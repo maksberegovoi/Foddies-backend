@@ -9,9 +9,14 @@ class IngredientController {
         req: Request,
         res: Response<ApiResponse<ingredientsDto[]>>
     ) => {
-        const ingredient = await this.ingredientsService.getIngredients()
+        const page = Number(req.query.page) || 1
+        const limit = Number(req.query.limit) || 10
+        const ingredient = await this.ingredientsService.getIngredients(
+            page,
+            limit
+        )
 
-        res.json({ data: ingredient })
+        res.json({ data: ingredient || [] })
     }
 }
 
