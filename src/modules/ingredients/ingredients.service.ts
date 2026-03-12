@@ -2,11 +2,7 @@ import prisma from '../../prisma'
 import type { IngredientDto } from './dto/ingredient.dto'
 
 class IngredientsService {
-    async getIngredients(
-        page: number = 1,
-        limit: number = 10
-    ): Promise<IngredientDto[]> {
-        const skip = (page - 1) * limit
+    async getIngredients(): Promise<IngredientDto[]> {
         return prisma.ingredient.findMany({
             select: {
                 id: true,
@@ -14,8 +10,6 @@ class IngredientsService {
                 description: true,
                 imageURL: true
             },
-            skip: skip,
-            take: limit,
             orderBy: {
                 name: 'asc'
             }
