@@ -3,7 +3,7 @@ import type { IngredientDto } from './dto/ingreient.dto.ts'
 
 class IngredientsService {
     async getIngredients(
-        page: number,
+        page: number = 1,
         limit: number = 10
     ): Promise<IngredientDto[]> {
         const skip = (page - 1) * limit
