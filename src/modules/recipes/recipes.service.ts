@@ -1,22 +1,102 @@
 import prisma from '../../prisma'
 import { createRecipeDto } from './schemas/create-recipe.schema'
 import { RecipeCardDto } from './dto/recipe-card.dto'
+import { RecipeDto } from './dto/recipe.dto'
+import ApiError from '../../shared/http/errors/api.error'
 
 // npm run typecheck
 // npx lint-staged
 
 class RecipesService {
-    async getAll() {}
-    async getById(recipeId: string): Promise<RecipeCardDto> {
-        return prisma.recipe.findUnique({
-            where: { id: recipeId }
+    async getAll(): Promise<RecipeCardDto[]> {
+        const recipes = await prisma.recipe.findMany({
+            select: {
+                id: true,
+                title: true,
+                instructions: true,
+                owner: {
+                    select: {
+                        id: true,
+                        avatarURL: true,
+                        name: true
+                    }
+                },
+                imageURL: true
+            }
         })
+
+        return recipes.map((recipe) => ({
+            id: recipe.id,
+            title: recipe.title,
+            instructions: recipe.instructions,
+            imageURL: recipe.imageURL,
+            ownerId: recipe.owner.id,
+            ownerAvatarURL: recipe.owner.avatarURL,
+            ownerName: recipe.owner.name
+        }))
     }
-    async getPopular(
-        limit: number = 4,
-        // TODO: remove default
-        userId?: string = '64c8d958249fae54bae90bb8'
-    ): Promise<RecipeCardDto[]> {
+
+    async getById(recipeId: string): Promise<RecipeDto> {
+        const recipe = await prisma.recipe.findUnique({
+            where: { id: recipeId },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                instructions: true,
+                time: true,
+                imageURL: true,
+                owner: {
+                    select: {
+                        id: true,
+                        avatarURL: true,
+                        name: true
+                    }
+                },
+                category: {
+                    select: { name: true }
+                },
+                area: {
+                    select: { name: true }
+                },
+                ingredients: {
+                    select: {
+                        measure: true,
+                        ingredient: {
+                            select: {
+                                name: true,
+                                imageURL: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        if (!recipe) {
+            throw ApiError.notFound('Recipe not found')
+        }
+
+        return {
+            id: recipe.id,
+            title: recipe.title,
+            description: recipe.description,
+            instructions: recipe.instructions,
+            time: recipe.time,
+            imageURL: recipe.imageURL,
+            category: recipe.category.name,
+            area: recipe.area.name,
+            ingredients: recipe.ingredients.map((i) => ({
+                name: i.ingredient.name,
+                imageURL: i.ingredient.imageURL,
+                measure: i.measure
+            })),
+            ownerId: recipe.owner.id,
+            ownerName: recipe.owner.name,
+            ownerAvatarURL: recipe.owner.avatarURL
+        }
+    }
+    async getPopular(limit: number = 4): Promise<RecipeCardDto[]> {
         const recipes = await prisma.recipe.findMany({
             orderBy: {
                 favoritedBy: {
@@ -25,32 +105,28 @@ class RecipesService {
             },
             take: limit,
             select: {
+                id: true,
+                imageURL: true,
+                title: true,
+                instructions: true,
                 owner: {
                     select: {
                         id: true,
                         avatarURL: true,
                         name: true
                     }
-                },
-                imageURL: true,
-                title: true,
-                instructions: true,
-                favoritedBy: userId
-                    ? { where: { id: userId }, select: { id: true } }
-                    : false
+                }
             }
         })
 
         return recipes.map((recipe) => ({
+            id: recipe.id,
             title: recipe.title,
             instructions: recipe.instructions,
             imageURL: recipe.imageURL,
             ownerId: recipe.owner.id,
             ownerAvatarURL: recipe.owner.avatarURL,
-            ownerName: recipe.owner.name,
-            isFavorite:
-                Array.isArray(recipe.favoritedBy) &&
-                recipe.favoritedBy.length > 0
+            ownerName: recipe.owner.name
         }))
     }
     async getUserRecipes(userId: string) {
