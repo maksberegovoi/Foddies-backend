@@ -2,7 +2,6 @@ import type { Request, Response } from 'express'
 import AuthService from './auth.service'
 import { signUpSchema } from './schemas/sign-up.schema'
 import { signInSchema } from './schemas/sign-in.schema'
-import getUser from '../../shared/helpers/get-user'
 import type { User } from '@prisma/client'
 import type { UserDto } from '../user/dto/user.dto'
 
@@ -36,9 +35,8 @@ class AuthController {
     }
 
     signOut = async (req: Request, res: Response) => {
-        const user = getUser(req)
-        await this.authService.signOutUser(user.id)
-        res.status(204).send()
+        await this.authService.signOutUser(req.user.id)
+        res.sendStatus(204)
     }
 }
 

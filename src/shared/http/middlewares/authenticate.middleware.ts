@@ -13,20 +13,19 @@ const authenticateMiddleware = async (
     if (!req.headers.authorization?.startsWith('Bearer ') || !token) {
         throw ApiError.unauthorized()
     }
-    let userId: string
     try {
-        userId = (jwt.verify(token, env.JWT_SECRET) as { id: string }).id
-        if (typeof userId !== 'string') throw ApiError.unauthorized()
+        const { id } = jwt.verify(token, env.JWT_SECRET) as { id: string }
+        if (typeof id !== 'string') throw ApiError.unauthorized()
+        // TODO - Replace this method with user module method when it will be implemented
+        const user = await prisma.user.findUnique({
+            where: { id }
+        })
+        if (!user || user.token !== token) throw ApiError.unauthorized()
+        req.user = user
+        next()
     } catch {
-        throw ApiError.unauthorized()
+        next(ApiError.unauthorized())
     }
-
-    const user = await prisma.user.findUnique({
-        where: { id: userId }
-    })
-    if (!user || user.token !== token) throw ApiError.unauthorized()
-    ;(req as { user?: typeof user }).user = user
-    next()
 }
 
 export default authenticateMiddleware

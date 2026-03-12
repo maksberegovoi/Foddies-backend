@@ -10,7 +10,7 @@ class AuthService {
     constructor() {}
 
     async signUpUser(userData: SignUpDto) {
-        // TODO - Crete user via user module insdtead of direct prisma model call
+        // TODO - Create user via user module insdtead of direct prisma model call
         // Throwing error if user with the same email already exists handled by error middleware
         return prisma.user.create({
             data: {
