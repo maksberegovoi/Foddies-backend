@@ -4,8 +4,6 @@ import { env } from '../../../env'
 import type { NextFunction, Request, Response } from 'express'
 import prisma from '../../../prisma'
 
-const NOT_AUTHORIZED_ERROR = ApiError.unauthorized('Not authorized')
-
 const authenticateMiddleware = async (
     req: Request,
     _: Response,
@@ -13,20 +11,20 @@ const authenticateMiddleware = async (
 ) => {
     const token = req.headers.authorization?.split(' ')[1]
     if (!req.headers.authorization?.startsWith('Bearer ') || !token) {
-        throw NOT_AUTHORIZED_ERROR
+        throw ApiError.unauthorized()
     }
     let userId: string
     try {
         userId = (jwt.verify(token, env.JWT_SECRET) as { id: string }).id
-        if (typeof userId !== 'string') throw NOT_AUTHORIZED_ERROR
+        if (typeof userId !== 'string') throw ApiError.unauthorized()
     } catch {
-        throw NOT_AUTHORIZED_ERROR
+        throw ApiError.unauthorized()
     }
 
     const user = await prisma.user.findUnique({
         where: { id: userId }
     })
-    if (!user || user.token !== token) throw NOT_AUTHORIZED_ERROR
+    if (!user || user.token !== token) throw ApiError.unauthorized()
     ;(req as { user?: typeof user }).user = user
     next()
 }

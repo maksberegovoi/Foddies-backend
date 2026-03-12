@@ -10,18 +10,14 @@ class AuthService {
     constructor() {}
 
     async signUpUser(userData: SignUpDto) {
-        const existingUser = await this.findUserByEmail(userData.email)
-
-        if (existingUser)
-            throw ApiError.conflict('User with this email already exists')
-
-        const newUser = await prisma.user.create({
+        // TODO - Crete user via user module insdtead of direct prisma model call
+        // Throwing error if user with the same email already exists handled by error middleware
+        return prisma.user.create({
             data: {
                 ...userData,
                 password: await bcrypt.hash(userData.password, 10)
             }
         })
-        return newUser
     }
 
     async signInUser(email: string, password: string) {
@@ -33,23 +29,25 @@ class AuthService {
             expiresIn: env.JWT_EXPIRES_IN
         })
 
-        return await this.updateUserToken(user.id, token)
+        return this.updateUserToken(user.id, token)
     }
 
     async signOutUser(userId: string) {
         await this.updateUserToken(userId, null)
     }
 
-    private async findUserByEmail(email: string) {
-        return await prisma.user.findUnique({
+    // TODO - Replace this method with user module method when it will be implemented
+    private findUserByEmail(email: string) {
+        return prisma.user.findUnique({
             where: {
                 email
             }
         })
     }
 
-    private async updateUserToken(userId: string, token: string | null) {
-        return await prisma.user.update({
+    private updateUserToken(userId: string, token: string | null) {
+        // TODO - User user via user module insdtead of direct prisma model call
+        return prisma.user.update({
             where: { id: userId },
             data: { token }
         })
