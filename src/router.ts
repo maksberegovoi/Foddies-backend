@@ -8,7 +8,7 @@ import areasRouter from './modules/areas/areas.router.js'
 
 const router = express.Router()
 
-router.use('/user', userRouter)
+router.use('/users', userRouter)
 router.use('/auth', authRouter)
 router.use('/categories', categoriesRouter)
 router.use('/ingredients', ingredientsRouter)

@@ -3,3 +3,11 @@ export interface UserDto {
     name: string
     email: string
 }
+
+export interface UserPublicDto extends UserDto {
+    avatarURL: string | null
+    totalRecipes: number
+    totalFavoriteRecipes: number
+    totalFollowers: number
+    totalFollowing: number
+}
