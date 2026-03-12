@@ -14,7 +14,7 @@ const authenticateMiddleware = async (
         throw ApiError.unauthorized()
     }
     try {
-        const { id } = jwt.verify(token, env.JWT_SECRET) as { id: string }
+        const { id } = jwt.verify(token, env.JWT_SECRET) as { id: unknown }
         if (typeof id !== 'string') throw ApiError.unauthorized()
         // TODO - Replace this method with user module method when it will be implemented
         const user = await prisma.user.findUnique({
