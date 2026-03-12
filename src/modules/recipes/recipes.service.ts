@@ -35,7 +35,6 @@ class RecipesService {
             ownerName: recipe.owner.name
         }))
     }
-
     async getById(recipeId: string): Promise<RecipeDto> {
         const recipe = await prisma.recipe.findUnique({
             where: { id: recipeId },
@@ -139,7 +138,7 @@ class RecipesService {
             where: { id: recipeId },
             data: {
                 favoritedBy: {
-                    disconnect: { id: userId }
+                    connect: { id: userId }
                 }
             }
         })
@@ -149,7 +148,7 @@ class RecipesService {
             where: { id: recipeId },
             data: {
                 favoritedBy: {
-                    connect: { id: userId }
+                    disconnect: { id: userId }
                 }
             }
         })
