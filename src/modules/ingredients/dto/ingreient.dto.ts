@@ -1,4 +1,4 @@
-export interface ingredientsDto {
+export interface IngredientDto {
     id: string
     name: string
     description: string

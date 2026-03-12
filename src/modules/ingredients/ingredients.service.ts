@@ -1,13 +1,13 @@
 import prisma from '../../prisma'
-import type { ingredientsDto } from './dto/ingreient.dto.ts'
+import type { IngredientDto } from './dto/ingreient.dto.ts'
 
-class IngredientService {
+class IngredientsService {
     async getIngredients(
         page: number,
         limit: number = 10
-    ): Promise<ingredientsDto[]> {
+    ): Promise<IngredientDto[]> {
         const skip = (page - 1) * limit
-        return await prisma.ingredient.findMany({
+        return prisma.ingredient.findMany({
             select: {
                 id: true,
                 name: true,
@@ -23,4 +23,4 @@ class IngredientService {
     }
 }
 
-export default IngredientService
+export default IngredientsService

@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { ingredientController } from './ingredients.controller'
+import { ingredientsController } from './ingredients.controller'
 
 const ingredientsRouter = Router()
 
-ingredientsRouter.get('/', ingredientController.getIngredients)
+ingredientsRouter.get('/', ingredientsController.getIngredients)
 
 export default ingredientsRouter

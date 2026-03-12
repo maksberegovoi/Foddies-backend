@@ -1,13 +1,13 @@
 import type { ApiResponse } from '../../shared/http/types/api-response.interface'
 import { type Request, type Response } from 'express'
-import IngredientService from './ingredients.service'
-import type { ingredientsDto } from './dto/ingreient.dto'
+import IngredientsService from './ingredients.service'
+import type { IngredientDto } from './dto/ingreient.dto'
 
-class IngredientController {
-    constructor(private readonly ingredientsService: IngredientService) {}
+class IngredientsController {
+    constructor(private readonly ingredientsService: IngredientsService) {}
     getIngredients = async (
         req: Request,
-        res: Response<ApiResponse<ingredientsDto[]>>
+        res: Response<ApiResponse<IngredientDto[]>>
     ) => {
         const page = Number(req.query.page) || 1
         const limit = Number(req.query.limit) || 10
@@ -20,6 +20,6 @@ class IngredientController {
     }
 }
 
-export const ingredientController = new IngredientController(
-    new IngredientService()
+export const ingredientsController = new IngredientsController(
+    new IngredientsService()
 )
