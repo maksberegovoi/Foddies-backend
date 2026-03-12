@@ -1,5 +1,5 @@
 import prisma from '../../prisma'
-import type { IngredientDto } from './dto/ingreient.dto.ts'
+import type { IngredientDto } from './dto/ingredient.dto'
 
 class IngredientsService {
     async getIngredients(
