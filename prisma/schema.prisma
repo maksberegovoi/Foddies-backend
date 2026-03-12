@@ -13,6 +13,7 @@ model User {
   password  String
   name      String
   avatarURL String?
+  token     String?
 
   recipes         Recipe[] @relation("UserRecipes")
   favoriteRecipes Recipe[] @relation("UserFavorites")
