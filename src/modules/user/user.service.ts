@@ -5,6 +5,7 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
 import type { UserDto, UserPublicDto } from './dto/user.dto'
+import type { FollowPageDto } from './dto/follow-page.dto'
 import type { CreateUserDto } from './schemas/create-user.schema'
 
 const userSelect = {
@@ -102,29 +103,18 @@ class UserService {
             throw ApiError.badRequest('You cannot follow yourself')
         }
 
-        const existingRelation = await prisma.user.findFirst({
-            where: {
-                id: userId,
-                following: {
-                    some: {
-                        id: targetUserId
+        try {
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    following: {
+                        connect: { id: targetUserId }
                     }
                 }
-            }
-        })
-
-        if (existingRelation) {
-            throw ApiError.badRequest('You are already following this user')
+            })
+        } catch {
+            throw ApiError.badRequest('Unable to follow user')
         }
-
-        await prisma.user.update({
-            where: { id: userId },
-            data: {
-                following: {
-                    connect: { id: targetUserId }
-                }
-            }
-        })
     }
 
     async unfollow({
@@ -138,56 +128,77 @@ class UserService {
             throw ApiError.badRequest('You cannot unfollow yourself')
         }
 
-        const existingRelation = await prisma.user.findFirst({
-            where: {
-                id: userId,
-                following: {
-                    some: {
-                        id: targetUserId
+        try {
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    following: {
+                        disconnect: { id: targetUserId }
                     }
                 }
-            }
-        })
-
-        if (!existingRelation) {
-            throw ApiError.badRequest('You are not following this user')
+            })
+        } catch {
+            throw ApiError.badRequest('Unable to unfollow user')
         }
+    }
 
-        await prisma.user.update({
+    async followers({
+        userId,
+        page,
+        limit
+    }: {
+        userId: string
+        page: number
+        limit: number
+    }): Promise<FollowPageDto> {
+        const skip = (page - 1) * limit
+
+        const user = await prisma.user.findUnique({
             where: { id: userId },
-            data: {
+            select: {
+                followers: {
+                    select: userSelect,
+                    skip,
+                    take: limit,
+                    orderBy: { createdAt: 'desc' }
+                },
+                _count: { select: { followers: true } }
+            }
+        })
+
+        if (!user) {
+            throw ApiError.notFound('User not found')
+        }
+
+        return {
+            users: user.followers.map((f) => this.transformUserWithCounts(f)),
+            page,
+            total: user._count.followers,
+            totalPages: Math.ceil(user._count.followers / limit)
+        }
+    }
+
+    async following({
+        userId,
+        page,
+        limit
+    }: {
+        userId: string
+        page: number
+        limit: number
+    }): Promise<FollowPageDto> {
+        const skip = (page - 1) * limit
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
                 following: {
-                    disconnect: { id: targetUserId }
-                }
-            }
-        })
-    }
-
-    async followers({ userId }: { userId: string }): Promise<UserPublicDto[]> {
-        const user = await prisma.user.findUnique({
-            where: {
-                id: userId
-            },
-            select: {
-                followers: { select: userSelect }
-            }
-        })
-
-        if (!user) {
-            throw ApiError.notFound('User not found')
-        }
-        return user.followers.map((follower) =>
-            this.transformUserWithCounts(follower)
-        )
-    }
-
-    async following({ userId }: { userId: string }): Promise<UserPublicDto[]> {
-        const user = await prisma.user.findUnique({
-            where: {
-                id: userId
-            },
-            select: {
-                following: { select: userSelect }
+                    select: userSelect,
+                    skip,
+                    take: limit,
+                    orderBy: { createdAt: 'desc' }
+                },
+                _count: { select: { following: true } }
             }
         })
 
@@ -195,7 +206,12 @@ class UserService {
             throw ApiError.notFound('User not found')
         }
 
-        return user.following.map((user) => this.transformUserWithCounts(user))
+        return {
+            users: user.following.map((u) => this.transformUserWithCounts(u)),
+            page,
+            total: user._count.following,
+            totalPages: Math.ceil(user._count.following / limit)
+        }
     }
 
     async uploadAvatar({
