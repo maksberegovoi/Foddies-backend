@@ -51,32 +51,34 @@ class UserService {
         }
     }
 
-    async getUserById({ userId }: { userId: string }): Promise<UserDto> {
+    async getUserById({ userId }: { userId: string }): Promise<UserPublicDto> {
         const user = await prisma.user.findFirst({
-            where: { id: userId }
+            where: { id: userId },
+            select: userSelect
         })
 
         if (!user) {
             throw ApiError.notFound('User not found')
         }
 
-        return user
+        return this.transformUserWithCounts(user)
     }
 
     async getUserByEmail({
         email
     }: {
         email: string
-    }): Promise<UserDto | null> {
+    }): Promise<UserPublicDto | null> {
         const user = await prisma.user.findFirst({
-            where: { email }
+            where: { email },
+            select: userSelect
         })
 
         if (!user) {
             return null
         }
 
-        return user
+        return this.transformUserWithCounts(user)
     }
 
     async current({ userId }: { userId: string }): Promise<UserPublicDto> {

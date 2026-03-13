@@ -20,6 +20,16 @@ class UserController {
         res.json({ data: user })
     }
 
+    getUserById = async (
+        req: Request,
+        res: Response<ApiResponse<UserPublicDto>>
+    ) => {
+        const userId = String(req.params['id'])
+        const user = await this.userService.getUserById({ userId })
+
+        res.json({ data: user })
+    }
+
     followers = async (
         req: Request,
         res: Response<ApiResponse<FollowPageDto>>
@@ -27,7 +37,7 @@ class UserController {
         const { page, limit } = paginationQuery.parse(req.query)
 
         const result = await this.userService.followers({
-            userId: req.user?.id,
+            userId: String(req.params['id']),
             page,
             limit
         })
@@ -42,7 +52,7 @@ class UserController {
         const { page, limit } = paginationQuery.parse(req.query)
 
         const result = await this.userService.following({
-            userId: req.user?.id,
+            userId: String(req.params['id']),
             page,
             limit
         })
@@ -52,7 +62,7 @@ class UserController {
 
     follow = async (req: Request, res: Response<ApiResponse<void>>) => {
         const userId = req.user?.id
-        const targetUserId = req.body['targetUserId'] as string
+        const targetUserId = String(req.body['targetUserId'])
         await this.userService.follow({ userId, targetUserId })
 
         res.status(204).json()
@@ -60,7 +70,7 @@ class UserController {
 
     unfollow = async (req: Request, res: Response<ApiResponse<void>>) => {
         const userId = req.user?.id
-        const targetUserId = req.body['targetUserId'] as string
+        const targetUserId = String(req.body['targetUserId'])
         await this.userService.unfollow({ userId, targetUserId })
 
         res.status(204).json()
