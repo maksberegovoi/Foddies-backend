@@ -1,15 +1,33 @@
 import { Router } from 'express'
 import { recipesController } from './recipes.controller'
+import authenticateMiddleware from '../../shared/http/middlewares/authenticate.middleware'
 
 const recipesRouter = Router()
 
 recipesRouter.get('/', recipesController.getAll)
-recipesRouter.get('/:id', recipesController.getById)
+recipesRouter.get(
+    '/my',
+    authenticateMiddleware,
+    recipesController.getUserRecipes
+)
 recipesRouter.get('/popular', recipesController.getPopular)
-recipesRouter.get('/my', recipesController.getUserRecipes) // authMw
-recipesRouter.patch('/:id/favorite', recipesController.addFavorite) // authMw
-recipesRouter.patch('/:id/unfavorite', recipesController.removeFavorite) // authMw
-recipesRouter.post('/', recipesController.create) // authMw
-recipesRouter.delete('/:id', recipesController.delete) // authMw
+recipesRouter.get(
+    '/favorite',
+    authenticateMiddleware,
+    recipesController.getFavorite
+)
+recipesRouter.get('/:id', recipesController.getById)
+recipesRouter.post(
+    '/:id/favorite',
+    authenticateMiddleware,
+    recipesController.addFavorite
+)
+recipesRouter.delete(
+    '/:id/favorite',
+    authenticateMiddleware,
+    recipesController.removeFavorite
+)
+recipesRouter.post('/', authenticateMiddleware, recipesController.create)
+recipesRouter.delete('/:id', authenticateMiddleware, recipesController.delete)
 
 export default recipesRouter

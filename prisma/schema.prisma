@@ -47,6 +47,7 @@ model Recipe {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([title, ownerId])
   @@index([ownerId])
   @@index([categoryId])
   @@index([areaId])

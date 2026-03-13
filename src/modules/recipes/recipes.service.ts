@@ -1,44 +1,53 @@
 import prisma from '../../prisma'
-import { createRecipeDto } from './schemas/create-recipe.schema'
-import { RecipeCardDto } from './dto/recipe-card.dto'
-import { RecipeDto } from './dto/recipe.dto'
+import type { RecipeCardDto } from './dto/recipe-card.dto'
+import type { RecipeDto } from './dto/recipe.dto'
 import ApiError from '../../shared/http/errors/api.error'
-import { RecipesQuerySchema } from './schemas/param-filters.schema'
-import { recipeOrderingUtil } from './utils/recipe-ordering.util'
+import type { RecipesQuerySchema } from './schemas/param-filters.schema'
+import type { Prisma } from '@prisma/client'
+import { recipeCardMapper } from './mapper/recipe-card.mapper'
+import type { GetAllRecipesDto } from './dto/get-all-recipes.dto'
+import type { CreateRecipeDto } from './schemas/create-recipe.schema'
+import { recipeFiltertingUtil } from './utils/recipe-filtering.util'
 
-// npm run typecheck
-// npx lint-staged
+export const recipeCardSelect = {
+    id: true,
+    imageURL: true,
+    title: true,
+    instructions: true,
+    owner: {
+        select: {
+            id: true,
+            avatarURL: true,
+            name: true
+        }
+    }
+} as const satisfies Prisma.RecipeSelect
 
 class RecipesService {
-    async getAll(query: RecipesQuerySchema): Promise<RecipeCardDto[]> {
-        const where = recipeOrderingUtil(query)
+    async getAll(query: RecipesQuerySchema): Promise<GetAllRecipesDto> {
+        const where = recipeFiltertingUtil(query)
 
-        const recipes = await prisma.recipe.findMany({
-            where,
-            select: {
-                id: true,
-                title: true,
-                instructions: true,
-                owner: {
-                    select: {
-                        id: true,
-                        avatarURL: true,
-                        name: true
-                    }
-                },
-                imageURL: true
-            }
-        })
+        const limit = query.limit || 10
+        const page = query.page || 1
+        const skip = (page - 1) * limit
 
-        return recipes.map((recipe) => ({
-            id: recipe.id,
-            title: recipe.title,
-            instructions: recipe.instructions,
-            imageURL: recipe.imageURL,
-            ownerId: recipe.owner.id,
-            ownerAvatarURL: recipe.owner.avatarURL,
-            ownerName: recipe.owner.name
-        }))
+        const [recipes, total] = await prisma.$transaction([
+            prisma.recipe.findMany({
+                where,
+                take: limit,
+                skip,
+                orderBy: { createdAt: 'desc' },
+                select: recipeCardSelect
+            }),
+            prisma.recipe.count({ where })
+        ])
+
+        return {
+            items: recipes.map(recipeCardMapper),
+            total,
+            page,
+            limit
+        }
     }
     async getById(recipeId: string): Promise<RecipeDto> {
         const recipe = await prisma.recipe.findUnique({
@@ -108,38 +117,29 @@ class RecipesService {
                 }
             },
             take: limit,
-            select: {
-                id: true,
-                imageURL: true,
-                title: true,
-                instructions: true,
-                owner: {
-                    select: {
-                        id: true,
-                        avatarURL: true,
-                        name: true
-                    }
-                }
-            }
+            select: recipeCardSelect
         })
 
-        return recipes.map((recipe) => ({
-            id: recipe.id,
-            title: recipe.title,
-            instructions: recipe.instructions,
-            imageURL: recipe.imageURL,
-            ownerId: recipe.owner.id,
-            ownerAvatarURL: recipe.owner.avatarURL,
-            ownerName: recipe.owner.name
-        }))
+        return recipes.map(recipeCardMapper)
     }
-    async getUserRecipes(userId: string) {
-        return prisma.recipe.findMany({
-            where: { ownerId: userId }
+    async getUserRecipes(userId: string): Promise<RecipeCardDto[]> {
+        const recipes = await prisma.recipe.findMany({
+            where: { ownerId: userId },
+            select: recipeCardSelect
         })
+
+        return recipes.map(recipeCardMapper)
+    }
+    async getFavorite(userId: string): Promise<RecipeCardDto[]> {
+        const recipes = await prisma.recipe.findMany({
+            where: { favoritedBy: { some: { id: userId } } },
+            select: recipeCardSelect
+        })
+
+        return recipes.map(recipeCardMapper)
     }
     async addFavorite(recipeId: string, userId: string) {
-        return prisma.recipe.update({
+        await prisma.recipe.update({
             where: { id: recipeId },
             data: {
                 favoritedBy: {
@@ -149,7 +149,7 @@ class RecipesService {
         })
     }
     async removeFavorite(recipeId: string, userId: string) {
-        return prisma.recipe.update({
+        await prisma.recipe.update({
             where: { id: recipeId },
             data: {
                 favoritedBy: {
@@ -158,7 +158,7 @@ class RecipesService {
             }
         })
     }
-    async create(data: createRecipeDto, userId: string) {
+    async create(data: CreateRecipeDto, userId: string) {
         return prisma.recipe.create({
             data: {
                 title: data.title,
@@ -180,8 +180,23 @@ class RecipesService {
         })
     }
     async delete(recipeId: string, userId: string) {
+        const recipe = await prisma.recipe.findUnique({
+            where: { id: recipeId },
+            select: { ownerId: true }
+        })
+
+        if (!recipe) {
+            throw ApiError.notFound('Recipe not found')
+        }
+
+        if (recipe.ownerId !== userId) {
+            throw ApiError.forbidden(
+                'You are not allowed to delete this recipe'
+            )
+        }
+
         await prisma.recipe.delete({
-            where: { id: recipeId, ownerId: userId }
+            where: { id: recipeId }
         })
     }
 }

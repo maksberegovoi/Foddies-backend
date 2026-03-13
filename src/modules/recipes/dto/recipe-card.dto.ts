@@ -1,9 +1,6 @@
-export interface RecipeCardDto {
-    id: string
-    title: string
-    instructions: string
-    ownerId: string
-    ownerAvatarURL: string | null
-    ownerName: string
-    imageURL: string
-}
+import type { RecipeDto } from './recipe.dto'
+
+export type RecipeCardDto = Omit<
+    RecipeDto,
+    'description' | 'ingredients' | 'time' | 'category' | 'area'
+>
