@@ -3,13 +3,18 @@ import { createRecipeDto } from './schemas/create-recipe.schema'
 import { RecipeCardDto } from './dto/recipe-card.dto'
 import { RecipeDto } from './dto/recipe.dto'
 import ApiError from '../../shared/http/errors/api.error'
+import { RecipesQuerySchema } from './schemas/param-filters.schema'
+import { recipeOrderingUtil } from './utils/recipe-ordering.util'
 
 // npm run typecheck
 // npx lint-staged
 
 class RecipesService {
-    async getAll(): Promise<RecipeCardDto[]> {
+    async getAll(query: RecipesQuerySchema): Promise<RecipeCardDto[]> {
+        const where = recipeOrderingUtil(query)
+
         const recipes = await prisma.recipe.findMany({
+            where,
             select: {
                 id: true,
                 title: true,

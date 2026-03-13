@@ -2,9 +2,10 @@ import { type Request, type Response } from 'express'
 import type { ApiResponse } from '../../shared/http/types/api-response.interface'
 import RecipesService from './recipes.service'
 import { RecipeCardDto } from './dto/recipe-card.dto'
-import { RecipeDto } from './dto/recipe.dto'
 import { idParamSchema } from '../../shared/http/schemas/idParam.schema'
 import { createRecipeSchema } from './dto/create-recipe.dto'
+import { getRecipesQuerySchema } from './schemas/param-filters.schema'
+import { type RecipeDto } from './dto/recipe.dto'
 
 class RecipesController {
     constructor(private readonly recipesService: RecipesService) {}
@@ -13,11 +14,11 @@ class RecipesController {
         req: Request,
         res: Response<ApiResponse<RecipeCardDto[]>>
     ) => {
-        //TODO: filters
-        const recipes = await this.recipesService.getAll()
+        const query = getRecipesQuerySchema.parse(req.query)
+        const recipes = await this.recipesService.getAll(query)
         res.json({ data: recipes })
     }
-    getById = async (req: Request, res: Response<ApiResponse<any>>) => {
+    getById = async (req: Request, res: Response<ApiResponse<RecipeDto>>) => {
         const { id } = idParamSchema.parse(req.params)
         const recipe = await this.recipesService.getById(id)
         res.json({ data: recipe })
