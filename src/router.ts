@@ -9,7 +9,7 @@ import recipesRouter from './modules/recipes/recipes.router'
 
 const router = express.Router()
 
-router.use('/user', userRouter)
+router.use('/users', userRouter)
 router.use('/auth', authRouter)
 router.use('/categories', categoriesRouter)
 router.use('/ingredients', ingredientsRouter)
