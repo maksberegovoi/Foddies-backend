@@ -8,11 +8,11 @@ const userRouter = Router()
 userRouter.use(authenticateMiddleware)
 
 userRouter.get('/current', userController.current)
-userRouter.get('/:id', userController.current)
-userRouter.get('/:id/followers', userController.followers)
 userRouter.get('/following', userController.following)
-userRouter.post('/follow', userController.follow)
-userRouter.delete('/follow', userController.unfollow)
+userRouter.get('/:id', userController.getUserById)
+userRouter.get('/:id/followers', userController.followers)
+userRouter.post('/:id/follow', userController.follow)
+userRouter.delete('/:id/follow', userController.unfollow)
 userRouter.patch(
     '/avatar',
     uploadHandler.single('avatar'),

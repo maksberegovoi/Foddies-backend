@@ -52,7 +52,7 @@ class UserService {
     }
 
     async getUserById({ userId }: { userId: string }): Promise<UserPublicDto> {
-        const user = await prisma.user.findFirst({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: userSelect
         })
@@ -69,7 +69,7 @@ class UserService {
     }: {
         email: string
     }): Promise<UserPublicDto | null> {
-        const user = await prisma.user.findFirst({
+        const user = await prisma.user.findUnique({
             where: { email },
             select: userSelect
         })
@@ -82,7 +82,7 @@ class UserService {
     }
 
     async current({ userId }: { userId: string }): Promise<UserPublicDto> {
-        const user = await prisma.user.findFirst({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: userSelect
         })
