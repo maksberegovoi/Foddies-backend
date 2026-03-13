@@ -1,10 +1,14 @@
 import prisma from '../../prisma'
-import type { Prisma } from '@prisma/client'
+import type { User, Prisma } from '@prisma/client'
 import { ApiError } from '../../shared/http/errors/api.error'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
-import type { UserDto, UserPublicDto } from './dto/user.dto'
+import type {
+    UserDto,
+    UserProfileDto,
+    UserProfilePublicDto
+} from './dto/user.dto'
 import type { FollowPageDto } from './dto/follow-page.dto'
 import type { CreateUserDto } from './schemas/create-user.schema'
 
@@ -28,7 +32,7 @@ const userSelect = {
 type UserWithCounts = Prisma.UserGetPayload<{ select: typeof userSelect }>
 
 class UserService {
-    private transformUserWithCounts(user: UserWithCounts): UserPublicDto {
+    private toUserProfileDto(user: UserWithCounts): UserProfileDto {
         const { _count, ...userData } = user
         return {
             ...userData,
@@ -36,6 +40,15 @@ class UserService {
             totalFavoriteRecipes: _count.favoriteRecipes,
             totalFollowers: _count.followers,
             totalFollowing: _count.following
+        }
+    }
+
+    private toUserProfilePublicDto(user: UserWithCounts): UserProfilePublicDto {
+        const { _count, ...userData } = user
+        return {
+            ...userData,
+            totalRecipes: _count.recipes,
+            totalFollowers: _count.followers
         }
     }
 
@@ -47,11 +60,16 @@ class UserService {
         return {
             id: user.id,
             email: user.email,
-            name: user.name
+            name: user.name,
+            avatarURL: user.avatarURL
         }
     }
 
-    async getUserById({ userId }: { userId: string }): Promise<UserPublicDto> {
+    async getUserById({
+        userId
+    }: {
+        userId: string
+    }): Promise<UserProfilePublicDto> {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: userSelect
@@ -61,27 +79,29 @@ class UserService {
             throw ApiError.notFound('User not found')
         }
 
-        return this.transformUserWithCounts(user)
+        return this.toUserProfilePublicDto(user)
     }
 
-    async getUserByEmail({
-        email
-    }: {
-        email: string
-    }): Promise<UserPublicDto | null> {
+    async getUserByEmail({ email }: { email: string }): Promise<User | null> {
         const user = await prisma.user.findUnique({
-            where: { email },
-            select: userSelect
+            where: { email }
         })
 
         if (!user) {
             return null
         }
 
-        return this.transformUserWithCounts(user)
+        return user
     }
 
-    async current({ userId }: { userId: string }): Promise<UserPublicDto> {
+    async updateUserToken(userId: string, token: string | null) {
+        return prisma.user.update({
+            where: { id: userId },
+            data: { token }
+        })
+    }
+
+    async current({ userId }: { userId: string }): Promise<UserProfileDto> {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: userSelect
@@ -91,7 +111,7 @@ class UserService {
             throw ApiError.notFound('User not found')
         }
 
-        return this.transformUserWithCounts(user)
+        return this.toUserProfileDto(user)
     }
 
     async follow({
@@ -173,7 +193,7 @@ class UserService {
         }
 
         return {
-            users: user.followers.map((f) => this.transformUserWithCounts(f)),
+            users: user.followers.map((f) => this.toUserProfilePublicDto(f)),
             page,
             total: user._count.followers,
             totalPages: Math.ceil(user._count.followers / limit)
@@ -209,7 +229,7 @@ class UserService {
         }
 
         return {
-            users: user.following.map((u) => this.transformUserWithCounts(u)),
+            users: user.following.map((u) => this.toUserProfilePublicDto(u)),
             page,
             total: user._count.following,
             totalPages: Math.ceil(user._count.following / limit)

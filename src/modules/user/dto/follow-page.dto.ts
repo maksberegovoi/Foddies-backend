@@ -1,7 +1,7 @@
-import type { UserPublicDto } from './user.dto'
+import type { UserProfilePublicDto } from './user.dto'
 
 export interface FollowPageDto {
-    users: UserPublicDto[]
+    users: UserProfilePublicDto[]
     page: number
     total: number
     totalPages: number

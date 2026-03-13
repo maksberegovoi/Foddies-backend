@@ -1,7 +1,7 @@
 import { type Request, type Response } from 'express'
 import UserService from './user.service'
 
-import type { UserPublicDto } from './dto/user.dto'
+import type { UserProfileDto, UserProfilePublicDto } from './dto/user.dto'
 import type { FollowPageDto } from './dto/follow-page.dto'
 import type { ApiResponse } from '../../shared/http/types/api-response.interface'
 import { paginationQuery } from './schemas/pagination-query.schema'
@@ -12,7 +12,7 @@ class UserController {
 
     current = async (
         req: Request,
-        res: Response<ApiResponse<UserPublicDto>>
+        res: Response<ApiResponse<UserProfileDto>>
     ) => {
         const user = await this.userService.current({
             userId: req.user?.id
@@ -23,7 +23,7 @@ class UserController {
 
     getUserById = async (
         req: Request,
-        res: Response<ApiResponse<UserPublicDto>>
+        res: Response<ApiResponse<UserProfilePublicDto>>
     ) => {
         const userId = req.user.id
         const user = await this.userService.getUserById({ userId })

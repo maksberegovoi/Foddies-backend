@@ -1,27 +1,31 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
-import prisma from '../../prisma'
 import { ApiError } from '../../shared/http/errors/api.error'
 import type { SignUpDto } from './schemas/sign-up.schema'
 import { env } from '../../env'
+import UserService from '../user/user.service'
+import type { UserDto } from '../user/dto/user.dto'
 
 class AuthService {
     constructor() {}
 
-    async signUpUser(userData: SignUpDto) {
-        // TODO - Create user via user module insdtead of direct prisma model call
-        // Throwing error if user with the same email already exists handled by error middleware
-        return prisma.user.create({
-            data: {
-                ...userData,
-                password: await bcrypt.hash(userData.password, 10)
-            }
+    userService = new UserService()
+
+    async signUpUser(userData: SignUpDto): Promise<UserDto> {
+        const hashedPassword = await bcrypt.hash(userData.password, 10)
+        return this.userService.create({
+            email: userData.email,
+            name: userData.name,
+            password: hashedPassword
         })
     }
 
     async signInUser(email: string, password: string) {
-        const user = await this.findUserByEmail(email)
+        const user = await this.userService.getUserByEmail({ email })
+
+        console.log({ user })
+
         if (!user || !(await bcrypt.compare(password, user.password)))
             throw ApiError.unauthorized('Invalid email or password')
 
@@ -29,28 +33,11 @@ class AuthService {
             expiresIn: env.JWT_EXPIRES_IN
         })
 
-        return this.updateUserToken(user.id, token)
+        return this.userService.updateUserToken(user.id, token)
     }
 
     async signOutUser(userId: string) {
-        await this.updateUserToken(userId, null)
-    }
-
-    // TODO - Replace this method with user module method when it will be implemented
-    private findUserByEmail(email: string) {
-        return prisma.user.findUnique({
-            where: {
-                email
-            }
-        })
-    }
-
-    private updateUserToken(userId: string, token: string | null) {
-        // TODO - User user via user module insdtead of direct prisma model call
-        return prisma.user.update({
-            where: { id: userId },
-            data: { token }
-        })
+        await this.userService.updateUserToken(userId, null)
     }
 }
 
