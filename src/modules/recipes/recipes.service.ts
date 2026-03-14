@@ -5,9 +5,9 @@ import ApiError from '../../shared/http/errors/api.error'
 import type { RecipesQuerySchema } from './schemas/param-filters.schema'
 import type { Prisma } from '@prisma/client'
 import { recipeCardMapper } from './mapper/recipe-card.mapper'
-import type { GetAllRecipesDto } from './dto/get-all-recipes.dto'
 import type { CreateRecipeDto } from './schemas/create-recipe.schema'
 import { recipeFiltertingUtil } from './utils/recipe-filtering.util'
+import type { PaginationType } from '../../shared/http/types/pagination.type'
 
 export const recipeCardSelect = {
     id: true,
@@ -24,11 +24,12 @@ export const recipeCardSelect = {
 } as const satisfies Prisma.RecipeSelect
 
 class RecipesService {
-    async getAll(query: RecipesQuerySchema): Promise<GetAllRecipesDto> {
+    async getAll(
+        query: RecipesQuerySchema
+    ): Promise<{ items: RecipeCardDto[] } & PaginationType> {
         const where = recipeFiltertingUtil(query)
 
-        const limit = query.limit || 10
-        const page = query.page || 1
+        const { limit, page } = query
         const skip = (page - 1) * limit
 
         const [recipes, total] = await prisma.$transaction([

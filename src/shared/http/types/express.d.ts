@@ -1,9 +1,11 @@
-import type { User } from '@prisma/client'
+import { type UserProfileDto } from '../../../modules/user/dto/user.dto'
 
 declare global {
     namespace Express {
         interface Request {
-            user: User
+            user: UserProfileDto
         }
     }
 }
+
+export {}

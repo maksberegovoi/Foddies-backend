@@ -1,4 +1,4 @@
-import type { ApiResponse } from '../../shared/http/types/api-response.interface'
+import type { ApiResponse } from '../../shared/http/types/api-response.type'
 import { type Request, type Response } from 'express'
 import IngredientsService from './ingredients.service'
 import type { IngredientDto } from './dto/ingredient.dto'
