@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { categoriesController } from './categories.controller'
 
 const categoriesRouter = Router()
 
@@ -32,5 +33,6 @@ const categoriesRouter = Router()
  *                     type: string
  *                     example: Салати
  */
+categoriesRouter.get('/', categoriesController.getCategories)
 
 export default categoriesRouter
