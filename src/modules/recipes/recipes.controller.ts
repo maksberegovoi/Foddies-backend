@@ -72,8 +72,9 @@ class RecipesController {
         res: Response<ApiResponse<{ id: string }>>
     ) => {
         const { id: userId } = req.user
+        const file = req.file
         const data = createRecipeSchema.parse(req.body)
-        const recipeId = await this.recipesService.create(data, userId)
+        const recipeId = await this.recipesService.create(data, userId, file)
         res.json({ data: recipeId })
     }
     delete = async (req: Request, res: Response) => {

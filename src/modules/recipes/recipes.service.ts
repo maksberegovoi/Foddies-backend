@@ -8,6 +8,8 @@ import { recipeCardMapper } from './mapper/recipe-card.mapper'
 import type { CreateRecipeDto } from './schemas/create-recipe.schema'
 import { recipeFiltertingUtil } from './utils/recipe-filtering.util'
 import type { PaginationType } from '../../shared/http/types/pagination.type'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 
 export const recipeCardSelect = {
     id: true,
@@ -159,14 +161,20 @@ class RecipesService {
             }
         })
     }
-    async create(data: CreateRecipeDto, userId: string) {
+    async create(
+        data: CreateRecipeDto,
+        userId: string,
+        file?: Express.Multer.File
+    ) {
+        const imageURL = await this.uploadImage(file)
+
         return prisma.recipe.create({
             data: {
                 title: data.title,
                 description: data.description,
                 instructions: data.instructions,
                 time: data.time,
-                imageURL: data.imageURL,
+                imageURL,
                 ownerId: userId,
                 categoryId: data.categoryId,
                 areaId: data.areaId,
@@ -199,6 +207,18 @@ class RecipesService {
         await prisma.recipe.delete({
             where: { id: recipeId }
         })
+    }
+
+    async uploadImage(file?: Express.Multer.File): Promise<string> {
+        if (!file) {
+            throw ApiError.badRequest('No file provided')
+        }
+
+        const newPath = path.resolve('public', 'recipes', file.filename)
+        await fs.rename(file.path, newPath)
+        const imageURL = path.join('/recipes', file.filename)
+
+        return imageURL
     }
 }
 
