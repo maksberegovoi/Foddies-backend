@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { recipesController } from './recipes.controller'
 import authenticateMiddleware from '../../shared/http/middlewares/authenticate.middleware'
+import { uploadHandler } from '../../shared/http/middlewares/upload-handler.middleware'
 
 const recipesRouter = Router()
 
@@ -27,7 +28,12 @@ recipesRouter.delete(
     authenticateMiddleware,
     recipesController.removeFavorite
 )
-recipesRouter.post('/', authenticateMiddleware, recipesController.create)
+recipesRouter.post(
+    '/',
+    authenticateMiddleware,
+    uploadHandler.single('image'),
+    recipesController.create
+)
 recipesRouter.delete('/:id', authenticateMiddleware, recipesController.delete)
 
 export default recipesRouter
