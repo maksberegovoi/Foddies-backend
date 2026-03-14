@@ -8,6 +8,7 @@ import { recipeCardMapper } from './mapper/recipe-card.mapper'
 import type { CreateRecipeDto } from './schemas/create-recipe.schema'
 import { recipeFiltertingUtil } from './utils/recipe-filtering.util'
 import type { PaginationType } from '../../shared/http/types/pagination.type'
+import type { PaginationQuery } from '../user/schemas/pagination-query.schema'
 
 export const recipeCardSelect = {
     id: true,
@@ -123,21 +124,52 @@ class RecipesService {
 
         return recipes.map(recipeCardMapper)
     }
-    async getUserRecipes(userId: string): Promise<RecipeCardDto[]> {
-        const recipes = await prisma.recipe.findMany({
-            where: { ownerId: userId },
-            select: recipeCardSelect
-        })
+    async getUserRecipes(
+        query: PaginationQuery,
+        userId: string
+    ): Promise<{ items: RecipeCardDto[] } & PaginationType> {
+        const { limit, page } = query
+        const skip = (page - 1) * limit
+        const [recipes, total] = await prisma.$transaction([
+            prisma.recipe.findMany({
+                where: { ownerId: userId },
+                take: limit,
+                skip,
+                select: recipeCardSelect
+            }),
+            prisma.recipe.count({ where: { ownerId: userId } })
+        ])
 
-        return recipes.map(recipeCardMapper)
+        return {
+            items: recipes.map(recipeCardMapper),
+            total,
+            page,
+            limit
+        }
     }
-    async getFavorite(userId: string): Promise<RecipeCardDto[]> {
-        const recipes = await prisma.recipe.findMany({
-            where: { favoritedBy: { some: { id: userId } } },
-            select: recipeCardSelect
-        })
+    async getFavorite(
+        query: PaginationQuery,
+        userId: string
+    ): Promise<{ items: RecipeCardDto[] } & PaginationType> {
+        const { limit, page } = query
+        const skip = (page - 1) * limit
+        const [recipes, total] = await prisma.$transaction([
+            prisma.recipe.findMany({
+                where: { favoritedBy: { some: { id: userId } } },
+                take: limit,
+                skip,
+                select: recipeCardSelect
+            }),
 
-        return recipes.map(recipeCardMapper)
+            prisma.recipe.count({ where: { ownerId: userId } })
+        ])
+
+        return {
+            items: recipes.map(recipeCardMapper),
+            total,
+            page,
+            limit
+        }
     }
     async addFavorite(recipeId: string, userId: string) {
         await prisma.recipe.update({

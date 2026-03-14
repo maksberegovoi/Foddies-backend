@@ -7,6 +7,7 @@ import { getRecipesQuerySchema } from './schemas/param-filters.schema'
 import { type RecipeDto } from './dto/recipe.dto'
 import { createRecipeSchema } from './schemas/create-recipe.schema'
 import type { ApiResponsePaginated } from '../../shared/http/types/api-response-paginated.type'
+import { paginationQuery } from '../user/schemas/pagination-query.schema'
 
 class RecipesController {
     constructor(private readonly recipesService: RecipesService) {}
@@ -40,19 +41,23 @@ class RecipesController {
     }
     getUserRecipes = async (
         req: Request,
-        res: Response<ApiResponse<RecipeCardDto[]>>
+        res: Response<ApiResponsePaginated<RecipeCardDto>>
     ) => {
         const { id: userId } = req.user
-        const recipes = await this.recipesService.getUserRecipes(userId)
-        res.json({ data: recipes })
+        const query = paginationQuery.parse(req.query)
+        const { items: recipes, ...meta } =
+            await this.recipesService.getUserRecipes(query, userId)
+        res.json({ data: recipes, meta })
     }
     getFavorite = async (
         req: Request,
-        res: Response<ApiResponse<RecipeCardDto[]>>
+        res: Response<ApiResponsePaginated<RecipeCardDto>>
     ) => {
         const { id: userId } = req.user
-        const recipes = await this.recipesService.getFavorite(userId)
-        res.json({ data: recipes })
+        const query = paginationQuery.parse(req.query)
+        const { items: recipes, ...meta } =
+            await this.recipesService.getFavorite(query, userId)
+        res.json({ data: recipes, meta })
     }
     addFavorite = async (req: Request, res: Response) => {
         const { id: userId } = req.user
@@ -69,7 +74,7 @@ class RecipesController {
     }
     create = async (
         req: Request,
-        res: Response<ApiResponse<{ id: string }>>
+        res: Response<ApiResponse<Pick<RecipeDto, 'id'>>>
     ) => {
         const { id: userId } = req.user
         const data = createRecipeSchema.parse(req.body)
