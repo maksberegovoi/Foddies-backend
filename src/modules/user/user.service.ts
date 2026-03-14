@@ -9,8 +9,9 @@ import type {
     UserProfileDto,
     UserProfilePublicDto
 } from './dto/user.dto'
-import type { FollowPageDto } from './dto/follow-page.dto'
 import type { CreateUserDto } from './schemas/create-user.schema'
+import type { PaginationQuery } from './schemas/pagination-query.schema'
+import type { PaginationType } from '../../shared/http/types/pagination.type'
 
 const userSelect = {
     id: true,
@@ -164,15 +165,11 @@ class UserService {
         }
     }
 
-    async followers({
-        userId,
-        page,
-        limit
-    }: {
+    async followers(
+        query: PaginationQuery,
         userId: string
-        page: number
-        limit: number
-    }): Promise<FollowPageDto> {
+    ): Promise<{ items: UserProfilePublicDto[] } & PaginationType> {
+        const { limit, page } = query
         const skip = (page - 1) * limit
 
         const user = await prisma.user.findUnique({
@@ -193,22 +190,18 @@ class UserService {
         }
 
         return {
-            users: user.followers.map((f) => this.toUserProfilePublicDto(f)),
+            items: user.followers.map((f) => this.toUserProfilePublicDto(f)),
             page,
-            total: user._count.followers,
-            totalPages: Math.ceil(user._count.followers / limit)
+            limit,
+            total: user._count.followers
         }
     }
 
-    async following({
-        userId,
-        page,
-        limit
-    }: {
+    async following(
+        query: PaginationQuery,
         userId: string
-        page: number
-        limit: number
-    }): Promise<FollowPageDto> {
+    ): Promise<{ items: UserProfilePublicDto[] } & PaginationType> {
+        const { limit, page } = query
         const skip = (page - 1) * limit
 
         const user = await prisma.user.findUnique({
@@ -229,10 +222,10 @@ class UserService {
         }
 
         return {
-            users: user.following.map((u) => this.toUserProfilePublicDto(u)),
+            items: user.following.map((u) => this.toUserProfilePublicDto(u)),
             page,
-            total: user._count.following,
-            totalPages: Math.ceil(user._count.following / limit)
+            limit,
+            total: user._count.following
         }
     }
 

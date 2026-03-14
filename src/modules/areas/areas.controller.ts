@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import AreasService from './areas.service'
-import type { ApiResponse } from '../../shared/http/types/api-response.interface'
 import type { AreasResponseDto } from './dto/areas-response.dto'
+import type { ApiResponse } from '../../shared/http/types/api-response.type'
 
 class AreasController {
     constructor(private readonly areasService: AreasService) {}

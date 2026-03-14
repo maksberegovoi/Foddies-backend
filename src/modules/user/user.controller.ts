@@ -1,11 +1,10 @@
 import { type Request, type Response } from 'express'
 import UserService from './user.service'
-
 import type { UserProfileDto, UserProfilePublicDto } from './dto/user.dto'
-import type { FollowPageDto } from './dto/follow-page.dto'
-import type { ApiResponse } from '../../shared/http/types/api-response.interface'
+import type { ApiResponse } from '../../shared/http/types/api-response.type'
 import { paginationQuery } from './schemas/pagination-query.schema'
 import { idParamSchema } from '../../shared/http/schemas/idParam.schema'
+import type { ApiResponsePaginated } from '../../shared/http/types/api-response-paginated.type'
 
 class UserController {
     constructor(private readonly userService: UserService) {}
@@ -33,32 +32,31 @@ class UserController {
 
     followers = async (
         req: Request,
-        res: Response<ApiResponse<FollowPageDto>>
+        res: Response<ApiResponsePaginated<UserProfilePublicDto>>
     ) => {
-        const { page, limit } = paginationQuery.parse(req.query)
+        const query = paginationQuery.parse(req.query)
+        const { id: userId } = idParamSchema.parse(req.params)
+        const { items: data, ...meta } = await this.userService.followers(
+            query,
+            userId
+        )
 
-        const result = await this.userService.followers({
-            userId: String(req.params['id']),
-            page,
-            limit
-        })
-
-        res.json({ data: result })
+        res.json({ data, meta })
     }
 
     following = async (
         req: Request,
-        res: Response<ApiResponse<FollowPageDto>>
+        res: Response<ApiResponsePaginated<UserProfilePublicDto>>
     ) => {
-        const { page, limit } = paginationQuery.parse(req.query)
+        const query = paginationQuery.parse(req.query)
+        const { id: userId } = idParamSchema.parse(req.params)
 
-        const result = await this.userService.following({
-            userId: String(req.params['id']),
-            page,
-            limit
-        })
+        const { items: data, ...meta } = await this.userService.following(
+            query,
+            userId
+        )
 
-        res.json({ data: result })
+        res.json({ data, meta })
     }
 
     follow = async (req: Request, res: Response<ApiResponse<void>>) => {

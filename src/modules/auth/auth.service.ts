@@ -4,13 +4,11 @@ import jwt from 'jsonwebtoken'
 import { ApiError } from '../../shared/http/errors/api.error'
 import type { SignUpDto } from './schemas/sign-up.schema'
 import { env } from '../../env'
-import UserService from '../user/user.service'
+import type UserService from '../user/user.service'
 import type { UserDto } from '../user/dto/user.dto'
 
 class AuthService {
-    constructor() {}
-
-    userService = new UserService()
+    constructor(private readonly userService: UserService) {}
 
     async signUpUser(userData: SignUpDto): Promise<UserDto> {
         const hashedPassword = await bcrypt.hash(userData.password, 10)
@@ -21,10 +19,11 @@ class AuthService {
         })
     }
 
-    async signInUser(email: string, password: string) {
+    async signInUser(
+        email: string,
+        password: string
+    ): Promise<{ user: UserDto; token: string }> {
         const user = await this.userService.getUserByEmail({ email })
-
-        console.log({ user })
 
         if (!user || !(await bcrypt.compare(password, user.password)))
             throw ApiError.unauthorized('Invalid email or password')
@@ -32,8 +31,16 @@ class AuthService {
         const token = jwt.sign({ id: user.id }, env.JWT_SECRET, {
             expiresIn: env.JWT_EXPIRES_IN
         })
-
-        return this.userService.updateUserToken(user.id, token)
+        await this.userService.updateUserToken(user.id, token)
+        return {
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                avatarURL: user.avatarURL
+            },
+            token
+        }
     }
 
     async signOutUser(userId: string) {

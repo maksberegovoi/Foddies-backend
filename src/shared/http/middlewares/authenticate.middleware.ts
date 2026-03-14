@@ -2,31 +2,32 @@ import jwt from 'jsonwebtoken'
 import ApiError from '../errors/api.error'
 import { env } from '../../../env'
 import type { NextFunction, Request, Response } from 'express'
-import prisma from '../../../prisma'
+import UserService from '../../../modules/user/user.service'
+
+const userService = new UserService()
 
 const authenticateMiddleware = async (
     req: Request,
     _: Response,
     next: NextFunction
 ) => {
-    const token = req.headers.authorization?.split(' ')[1]
-    if (!req.headers.authorization?.startsWith('Bearer ') || !token) {
-        throw ApiError.unauthorized()
+    const authHeader = req.headers.authorization
+    if (!authHeader?.startsWith('Bearer ')) {
+        throw ApiError.unauthorized('Missing or invalid token format')
     }
+    const token = authHeader.split(' ')[1]
+
+    let decoded: { id: string }
+
     try {
-        const { id } = jwt.verify(token, env.JWT_SECRET) as { id: string }
-        // TODO - Replace this method with user module method when it will be implemented
-        const user = await prisma.user.findUnique({
-            where: { id }
-        })
-        if (!user || user.token !== token) {
-            return next(ApiError.unauthorized())
-        }
-        req.user = user
-        next()
+        decoded = jwt.verify(token, env.JWT_SECRET) as { id: string }
     } catch {
-        next(ApiError.unauthorized())
+        throw ApiError.unauthorized('Invalid or expired token')
     }
+
+    req.user = await userService.current({ userId: decoded.id })
+
+    next()
 }
 
 export default authenticateMiddleware

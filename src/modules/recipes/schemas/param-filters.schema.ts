@@ -7,8 +7,8 @@ const stringToArray = z.preprocess(
 
 export const getRecipesQuerySchema = z.object({
     authorId: z.string().optional(),
-    limit: z.coerce.number().int().positive().optional(),
-    page: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().positive().optional().default(10),
+    page: z.coerce.number().int().positive().optional().default(1),
     categoryIds: stringToArray.optional(),
     areaIds: stringToArray.optional(),
     ingredientIds: stringToArray.optional()
