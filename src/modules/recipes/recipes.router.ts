@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { recipesController } from './recipes.controller'
 import authenticateMiddleware from '../../shared/http/middlewares/authenticate.middleware'
+import { uploadHandler } from '../../shared/http/middlewares/upload-handler.middleware'
 
 const recipesRouter = Router()
 
@@ -215,19 +216,56 @@ recipesRouter.delete(
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/CreateRecipeRequest'
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Spaghetti Carbonara
+ *               description:
+ *                 type: string
+ *                 example: Класичний італійський рецепт пасти
+ *               instructions:
+ *                 type: string
+ *                 example: 1. Відварити пасту...
+ *               time:
+ *                 type: number
+ *                 example: 30
+ *               category:
+ *                 type: string
+ *                 example: Pasta
+ *               area:
+ *                 type: string
+ *                 example: Italy
+ *               ingredients:
+ *                 type: string
+ *                 example: '[{"measure":"100g","name":"Spaghetti"}]'
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *             required:
+ *               - title
+ *               - description
+ *               - instructions
+ *               - time
+ *               - category
+ *               - area
+ *               - image
  *     responses:
  *       200:
- *         description: Повертає ID створеного рецепту
+ *         description: ID створеного рецепту
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CreateRecipeResponse'
  */
-recipesRouter.post('/', authenticateMiddleware, recipesController.create)
-
+recipesRouter.post(
+    '/',
+    authenticateMiddleware,
+    uploadHandler.single('image'),
+    recipesController.create
+)
 /**
  * @swagger
  * /recipes/{id}:
