@@ -15,7 +15,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use('/api/v1', router)
 app.use(express.static('public'))
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
 
 // the last one
 app.use(errorHandlerMiddleware)
