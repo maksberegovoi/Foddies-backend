@@ -1,24 +1,11 @@
 import multer from 'multer'
-import path from 'node:path'
 
 import type { Request } from 'express'
 import { ApiError } from '../errors/api.error'
 
-const destination = path.resolve('temp')
 const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
-const storage = multer.diskStorage({
-    destination,
-    filename: (
-        req: Request,
-        file: Express.Multer.File,
-        cb: (error: Error | null, filename: string) => void
-    ) => {
-        const uniquePrefix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`
-        const filename = `${uniquePrefix}_${file.originalname}`
-        cb(null, filename)
-    }
-})
+const storage = multer.memoryStorage()
 
 const limits = {
     fileSize: 1024 * 1024 * 10
