@@ -8,12 +8,13 @@ generator client {
 }
 
 model User {
-  id        String  @id @default(cuid())
-  email     String  @unique
-  password  String
-  name      String
-  avatarURL String?
-  token     String?
+  id             String  @id @default(cuid())
+  email          String  @unique
+  password       String
+  name           String
+  avatarURL      String?
+  avatarPublicId String?
+  token          String?
 
   recipes         Recipe[] @relation("UserRecipes")
   favoriteRecipes Recipe[] @relation("UserFavorites")

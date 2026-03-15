@@ -232,7 +232,7 @@ class RecipesService {
             throw ApiError.badRequest('No file provided')
         }
 
-        const imageURL = await uploadToCloudinary(file.path, 'recipes')
+        const imageURL = await uploadToCloudinary(file.buffer, 'recipes')
 
         return {
             imageURL: imageURL.originalUrl,
