@@ -12,7 +12,6 @@ app.use(express.json())
 app.use(morgan('dev'))
 app.use(express.json())
 app.use('/api/v1', router)
-app.use(express.static('public'))
 
 // the last one
 app.use(errorHandlerMiddleware)

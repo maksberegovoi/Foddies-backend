@@ -22,7 +22,7 @@ class AuthService {
     async signInUser(
         email: string,
         password: string
-    ): Promise<{ user: UserDto; token: string }> {
+    ): Promise<UserDto & { token: string }> {
         const user = await this.userService.getUserByEmail({ email })
 
         if (!user || !(await bcrypt.compare(password, user.password)))
@@ -33,12 +33,10 @@ class AuthService {
         })
         await this.userService.updateUserToken(user.id, token)
         return {
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                avatarURL: user.avatarURL
-            },
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatarURL: user.avatarURL,
             token
         }
     }

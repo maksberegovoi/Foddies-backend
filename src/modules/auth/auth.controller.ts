@@ -18,13 +18,13 @@ class AuthController {
 
     signIn = async (
         req: Request,
-        res: Response<ApiResponse<{ user: UserDto; token: string }>>
+        res: Response<ApiResponse<UserDto & { token: string }>>
     ) => {
         const { email, password } = signInSchema.parse(req.body)
-        const result = await this.authService.signInUser(email, password)
+        const user = await this.authService.signInUser(email, password)
 
         res.status(200).json({
-            data: result
+            data: user
         })
     }
 
