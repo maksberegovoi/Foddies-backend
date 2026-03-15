@@ -40,24 +40,26 @@ cloudinary.config({
     secure: true
 })
 
-export const uploadToCloudinary = async (
-    filePath: string,
+export const uploadToCloudinary = (
+    buffer: Buffer,
     folder: string
 ): Promise<UploadedImage> => {
-    try {
-        const result = await cloudinary.uploader.upload(filePath, {
-            folder,
-            unique_filename: true,
-            overwrite: false
-        })
-        return {
-            publicId: result.public_id,
-            originalUrl: result.secure_url
-        }
-    } catch (error) {
-        console.error('Error uploading to Cloudinary:', error)
-        throw ApiError.internal('Failed to upload image')
-    }
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder, unique_filename: true, overwrite: false },
+            (error, result) => {
+                if (error || !result) {
+                    console.error('Error uploading to Cloudinary:', error)
+                    return reject(ApiError.internal('Failed to upload image'))
+                }
+                resolve({
+                    publicId: result.public_id,
+                    originalUrl: result.secure_url
+                })
+            }
+        )
+        stream.end(buffer)
+    })
 }
 
 export const buildResponsiveImageUrls = (
@@ -85,3 +87,11 @@ export const buildResponsiveImageUrls = (
           })
         : fallbackUrl
 })
+
+export const deleteFromCloudinary = async (publicId: string) => {
+    try {
+        await cloudinary.uploader.destroy(publicId)
+    } catch (error) {
+        console.error('Error deleting from Cloudinary:', error)
+    }
+}

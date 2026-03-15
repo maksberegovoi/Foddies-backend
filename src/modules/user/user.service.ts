@@ -1,8 +1,6 @@
 import prisma from '../../prisma'
 import type { User, Prisma } from '@prisma/client'
 import { ApiError } from '../../shared/http/errors/api.error'
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
 
 import type {
     UserDto,
@@ -12,6 +10,10 @@ import type {
 import type { CreateUserDto } from './schemas/create-user.schema'
 import type { PaginationQuery } from './schemas/pagination-query.schema'
 import type { PaginationType } from '../../shared/http/types/pagination.type'
+import {
+    deleteFromCloudinary,
+    uploadToCloudinary
+} from '../../shared/fileUpload/cloudinary'
 
 const userSelect = {
     id: true,
@@ -242,34 +244,27 @@ class UserService {
 
         const currentUser = await prisma.user.findUnique({
             where: { id: userId },
-            select: { avatarURL: true }
+            select: { avatarPublicId: true }
         })
 
         if (!currentUser) {
             throw ApiError.notFound('User not found')
         }
 
-        if (currentUser.avatarURL) {
-            try {
-                const oldAvatarPath = path.resolve(
-                    'public',
-                    currentUser.avatarURL.substring(1)
-                )
-                await fs.unlink(oldAvatarPath)
-            } catch (error) {
-                console.warn(`Failed to delete old avatar: ${error}`)
-            }
+        if (currentUser.avatarPublicId) {
+            await deleteFromCloudinary(currentUser.avatarPublicId)
         }
-
-        const newPath = path.resolve('public', 'avatars', file.filename)
-        await fs.rename(file.path, newPath)
-        const avatarURL = path.join('/avatars', file.filename)
+        const { originalUrl: avatarURL, publicId } = await uploadToCloudinary(
+            file.buffer,
+            'avatars'
+        )
 
         await prisma.user.update({
             where: {
                 id: userId
             },
             data: {
+                avatarPublicId: publicId,
                 avatarURL
             }
         })
