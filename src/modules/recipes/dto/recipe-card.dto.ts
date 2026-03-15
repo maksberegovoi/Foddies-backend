@@ -1,6 +1,16 @@
-import type { RecipeDto } from './recipe.dto'
+import { recipeDtoSchema } from './recipe.dto'
+import { registry } from '../../../shared/api-docs/swagger'
+import { z } from 'zod'
 
-export type RecipeCardDto = Omit<
-    RecipeDto,
-    'description' | 'ingredients' | 'time' | 'category' | 'area'
->
+export const recipeCardSchema = registry.register(
+    'RecipeCardDto',
+    recipeDtoSchema.omit({
+        description: true,
+        ingredients: true,
+        time: true,
+        category: true,
+        area: true
+    })
+)
+
+export type RecipeCardDto = z.infer<typeof recipeCardSchema>

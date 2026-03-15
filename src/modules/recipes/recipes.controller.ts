@@ -8,6 +8,7 @@ import { type RecipeDto } from './dto/recipe.dto'
 import { createRecipeSchema } from './schemas/create-recipe.schema'
 import type { ApiResponsePaginated } from '../../shared/http/types/api-response-paginated.type'
 import { paginationQuery } from '../user/schemas/pagination-query.schema'
+import { UserRecipeDto } from './dto/user-recipe.dto'
 
 class RecipesController {
     constructor(private readonly recipesService: RecipesService) {}
@@ -47,7 +48,7 @@ class RecipesController {
 
     getUserRecipes = async (
         req: Request,
-        res: Response<ApiResponsePaginated<RecipeCardDto>>
+        res: Response<ApiResponsePaginated<UserRecipeDto>>
     ) => {
         const { id: userId } = req.user
         const query = paginationQuery.parse(req.query)
