@@ -8,7 +8,13 @@ export interface RecipeDto {
         name: string
         imageURL: string
     }[]
-    imageURL: string
+    image: {
+        original: string
+        phone: string
+        tablet: string
+        desktop: string
+        thumbnail: string
+    }
     ownerId: string
     ownerAvatarURL: string | null
     ownerName: string

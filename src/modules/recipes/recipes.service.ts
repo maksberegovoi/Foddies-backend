@@ -8,11 +8,15 @@ import { recipeCardMapper } from './mapper/recipe-card.mapper'
 import type { CreateRecipeDto } from './schemas/create-recipe.schema'
 import { recipeFiltertingUtil } from './utils/recipe-filtering.util'
 import type { PaginationType } from '../../shared/http/types/pagination.type'
-import type { PaginationQuery } from '../user/schemas/pagination-query.schema'
+import {
+    buildResponsiveImageUrls,
+    uploadToCloudinary
+} from '../../shared/fileUpload/cloudinary'
 
 export const recipeCardSelect = {
     id: true,
     imageURL: true,
+    imagePublicId: true,
     title: true,
     instructions: true,
     owner: {
@@ -23,6 +27,11 @@ export const recipeCardSelect = {
         }
     }
 } as const satisfies Prisma.RecipeSelect
+
+type UploadedRecipeImage = {
+    imageURL: string
+    imagePublicId: string
+}
 
 class RecipesService {
     async getAll(
@@ -61,6 +70,7 @@ class RecipesService {
                 instructions: true,
                 time: true,
                 imageURL: true,
+                imagePublicId: true,
                 owner: {
                     select: {
                         id: true,
@@ -98,7 +108,13 @@ class RecipesService {
             description: recipe.description,
             instructions: recipe.instructions,
             time: recipe.time,
-            imageURL: recipe.imageURL,
+            image: {
+                original: recipe.imageURL,
+                ...buildResponsiveImageUrls(
+                    recipe.imagePublicId || '',
+                    recipe.imageURL
+                )
+            },
             category: recipe.category.name,
             area: recipe.area.name,
             ingredients: recipe.ingredients.map((i) => ({
@@ -124,52 +140,21 @@ class RecipesService {
 
         return recipes.map(recipeCardMapper)
     }
-    async getUserRecipes(
-        query: PaginationQuery,
-        userId: string
-    ): Promise<{ items: RecipeCardDto[] } & PaginationType> {
-        const { limit, page } = query
-        const skip = (page - 1) * limit
-        const [recipes, total] = await prisma.$transaction([
-            prisma.recipe.findMany({
-                where: { ownerId: userId },
-                take: limit,
-                skip,
-                select: recipeCardSelect
-            }),
-            prisma.recipe.count({ where: { ownerId: userId } })
-        ])
+    async getUserRecipes(userId: string): Promise<RecipeCardDto[]> {
+        const recipes = await prisma.recipe.findMany({
+            where: { ownerId: userId },
+            select: recipeCardSelect
+        })
 
-        return {
-            items: recipes.map(recipeCardMapper),
-            total,
-            page,
-            limit
-        }
+        return recipes.map(recipeCardMapper)
     }
-    async getFavorite(
-        query: PaginationQuery,
-        userId: string
-    ): Promise<{ items: RecipeCardDto[] } & PaginationType> {
-        const { limit, page } = query
-        const skip = (page - 1) * limit
-        const [recipes, total] = await prisma.$transaction([
-            prisma.recipe.findMany({
-                where: { favoritedBy: { some: { id: userId } } },
-                take: limit,
-                skip,
-                select: recipeCardSelect
-            }),
+    async getFavorite(userId: string): Promise<RecipeCardDto[]> {
+        const recipes = await prisma.recipe.findMany({
+            where: { favoritedBy: { some: { id: userId } } },
+            select: recipeCardSelect
+        })
 
-            prisma.recipe.count({ where: { ownerId: userId } })
-        ])
-
-        return {
-            items: recipes.map(recipeCardMapper),
-            total,
-            page,
-            limit
-        }
+        return recipes.map(recipeCardMapper)
     }
     async addFavorite(recipeId: string, userId: string) {
         await prisma.recipe.update({
@@ -191,14 +176,21 @@ class RecipesService {
             }
         })
     }
-    async create(data: CreateRecipeDto, userId: string) {
+    async create(
+        data: CreateRecipeDto,
+        userId: string,
+        file?: Express.Multer.File
+    ) {
+        const imageURL = await this.uploadImage(file)
+
         return prisma.recipe.create({
             data: {
                 title: data.title,
                 description: data.description,
                 instructions: data.instructions,
                 time: data.time,
-                imageURL: data.imageURL,
+                imageURL: imageURL.imageURL,
+                imagePublicId: imageURL.imagePublicId,
                 ownerId: userId,
                 categoryId: data.categoryId,
                 areaId: data.areaId,
@@ -231,6 +223,21 @@ class RecipesService {
         await prisma.recipe.delete({
             where: { id: recipeId }
         })
+    }
+
+    async uploadImage(
+        file?: Express.Multer.File
+    ): Promise<UploadedRecipeImage> {
+        if (!file) {
+            throw ApiError.badRequest('No file provided')
+        }
+
+        const imageURL = await uploadToCloudinary(file.buffer, 'recipes')
+
+        return {
+            imageURL: imageURL.originalUrl,
+            imagePublicId: imageURL.publicId
+        }
     }
 }
 
