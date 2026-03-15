@@ -27,12 +27,13 @@ model User {
 }
 
 model Recipe {
-  id           String @id @default(cuid())
-  title        String
-  description  String
-  instructions String
-  time         Int
-  imageURL     String
+  id            String @id @default(cuid())
+  title         String
+  description   String
+  instructions  String
+  time          Int
+  imageURL      String
+  imagePublicId String?
 
   favoritedBy User[]             @relation("UserFavorites")
   ingredients RecipeIngredient[]

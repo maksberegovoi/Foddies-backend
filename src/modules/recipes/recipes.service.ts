@@ -8,12 +8,15 @@ import { recipeCardMapper } from './mapper/recipe-card.mapper'
 import type { CreateRecipeDto } from './schemas/create-recipe.schema'
 import { recipeFiltertingUtil } from './utils/recipe-filtering.util'
 import type { PaginationType } from '../../shared/http/types/pagination.type'
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
+import {
+    buildResponsiveImageUrls,
+    uploadToCloudinary
+} from '../../shared/fileUpload/cloudinary'
 
 export const recipeCardSelect = {
     id: true,
     imageURL: true,
+    imagePublicId: true,
     title: true,
     instructions: true,
     owner: {
@@ -24,6 +27,11 @@ export const recipeCardSelect = {
         }
     }
 } as const satisfies Prisma.RecipeSelect
+
+type UploadedRecipeImage = {
+    imageURL: string
+    imagePublicId: string
+}
 
 class RecipesService {
     async getAll(
@@ -62,6 +70,7 @@ class RecipesService {
                 instructions: true,
                 time: true,
                 imageURL: true,
+                imagePublicId: true,
                 owner: {
                     select: {
                         id: true,
@@ -99,7 +108,13 @@ class RecipesService {
             description: recipe.description,
             instructions: recipe.instructions,
             time: recipe.time,
-            imageURL: recipe.imageURL,
+            image: {
+                original: recipe.imageURL,
+                ...buildResponsiveImageUrls(
+                    recipe.imagePublicId || '',
+                    recipe.imageURL
+                )
+            },
             category: recipe.category.name,
             area: recipe.area.name,
             ingredients: recipe.ingredients.map((i) => ({
@@ -174,7 +189,8 @@ class RecipesService {
                 description: data.description,
                 instructions: data.instructions,
                 time: data.time,
-                imageURL,
+                imageURL: imageURL.imageURL,
+                imagePublicId: imageURL.imagePublicId,
                 ownerId: userId,
                 categoryId: data.categoryId,
                 areaId: data.areaId,
@@ -209,16 +225,19 @@ class RecipesService {
         })
     }
 
-    async uploadImage(file?: Express.Multer.File): Promise<string> {
+    async uploadImage(
+        file?: Express.Multer.File
+    ): Promise<UploadedRecipeImage> {
         if (!file) {
             throw ApiError.badRequest('No file provided')
         }
 
-        const newPath = path.resolve('public', 'recipes', file.filename)
-        await fs.rename(file.path, newPath)
-        const imageURL = path.join('/recipes', file.filename)
+        const imageURL = await uploadToCloudinary(file.path, 'recipes')
 
-        return imageURL
+        return {
+            imageURL: imageURL.originalUrl,
+            imagePublicId: imageURL.publicId
+        }
     }
 }
 
