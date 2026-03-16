@@ -1,0 +1,7 @@
+import '../../modules/categories/categories.swagger'
+import '../../modules/ingredients/ingredients.swagger'
+import '../../modules/testimonials/testimonials.swagger'
+import '../../modules/areas/areas.swagger'
+import '../../modules/recipes/recipes.swagger'
+import '../../modules/auth/auth.swagger'
+import '../../modules/user/user.swagger'

@@ -71,7 +71,8 @@ async function up() {
         await prisma.category.create({
             data: {
                 id: c._id['$oid'],
-                name: c.name
+                name: c.name,
+                description: c.description
             }
         })
     }

@@ -5,12 +5,13 @@ import { ApiError } from '../../shared/http/errors/api.error'
 import type { SignUpDto } from './schemas/sign-up.schema'
 import { env } from '../../env'
 import type UserService from '../user/user.service'
-import type { UserDto } from '../user/dto/user.dto'
+import type { UserProfileDto } from '../user/dto/user.dto'
+import type { SignInResponseDto } from './schemas/sign-in-response.schema'
 
 class AuthService {
     constructor(private readonly userService: UserService) {}
 
-    async signUpUser(userData: SignUpDto): Promise<UserDto> {
+    async signUpUser(userData: SignUpDto): Promise<UserProfileDto> {
         const hashedPassword = await bcrypt.hash(userData.password, 10)
         return this.userService.create({
             email: userData.email,
@@ -22,7 +23,7 @@ class AuthService {
     async signInUser(
         email: string,
         password: string
-    ): Promise<UserDto & { token: string }> {
+    ): Promise<SignInResponseDto> {
         const user = await this.userService.getUserByEmail({ email })
 
         if (!user || !(await bcrypt.compare(password, user.password)))
@@ -32,11 +33,10 @@ class AuthService {
             expiresIn: env.JWT_EXPIRES_IN
         })
         await this.userService.updateUserToken(user.id, token)
+
+        const { password: _, ...profile } = user
         return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            avatarURL: user.avatarURL,
+            ...profile,
             token
         }
     }

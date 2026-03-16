@@ -13,6 +13,7 @@ import {
     uploadToCloudinary
 } from '../../shared/fileUpload/cloudinary'
 import type { PaginationQuery } from '../user/schemas/pagination-query.schema'
+import type { UserRecipeDto } from './dto/user-recipe.dto'
 
 export const recipeCardSelect = {
     id: true,
@@ -128,7 +129,7 @@ class RecipesService {
             ownerAvatarURL: recipe.owner.avatarURL
         }
     }
-    async getPopular(limit: number = 4): Promise<RecipeCardDto[]> {
+    async getPopular(limit: number): Promise<RecipeCardDto[]> {
         const recipes = await prisma.recipe.findMany({
             orderBy: {
                 favoritedBy: {
@@ -144,7 +145,7 @@ class RecipesService {
     async getUserRecipes(
         query: PaginationQuery,
         userId: string
-    ): Promise<{ items: RecipeCardDto[] } & PaginationType> {
+    ): Promise<{ items: UserRecipeDto[] } & PaginationType> {
         const { limit, page } = query
         const skip = (page - 1) * limit
         const [recipes, total] = await prisma.$transaction([
@@ -152,13 +153,30 @@ class RecipesService {
                 where: { ownerId: userId },
                 take: limit,
                 skip,
-                select: recipeCardSelect
+                select: {
+                    id: true,
+                    title: true,
+                    instructions: true,
+                    imageURL: true,
+                    imagePublicId: true
+                }
             }),
             prisma.recipe.count({ where: { ownerId: userId } })
         ])
 
         return {
-            items: recipes.map(recipeCardMapper),
+            items: recipes.map((i) => ({
+                id: i.id,
+                title: i.title,
+                instructions: i.instructions,
+                image: {
+                    original: i.imageURL,
+                    ...buildResponsiveImageUrls(
+                        i.imagePublicId || '',
+                        i.imageURL
+                    )
+                }
+            })),
             page,
             limit,
             total

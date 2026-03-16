@@ -8,6 +8,8 @@ import { type RecipeDto } from './dto/recipe.dto'
 import { createRecipeSchema } from './schemas/create-recipe.schema'
 import type { ApiResponsePaginated } from '../../shared/http/types/api-response-paginated.type'
 import { paginationQuery } from '../user/schemas/pagination-query.schema'
+import type { UserRecipeDto } from './dto/user-recipe.dto'
+import { limitSchema } from '../../shared/http/schemas/pagination.schema'
 
 class RecipesController {
     constructor(private readonly recipesService: RecipesService) {}
@@ -40,14 +42,15 @@ class RecipesController {
         req: Request,
         res: Response<ApiResponse<RecipeCardDto[]>>
     ) => {
-        const recipes = await this.recipesService.getPopular()
+        const { limit } = limitSchema.parse(req.query)
+        const recipes = await this.recipesService.getPopular(limit)
 
         res.json({ data: recipes })
     }
 
     getUserRecipes = async (
         req: Request,
-        res: Response<ApiResponsePaginated<RecipeCardDto>>
+        res: Response<ApiResponsePaginated<UserRecipeDto>>
     ) => {
         const { id: userId } = req.user
         const query = paginationQuery.parse(req.query)
@@ -91,10 +94,11 @@ class RecipesController {
     ) => {
         const { id: userId } = req.user
         const file = req.file
+        console.log(req.body)
         const data = createRecipeSchema.parse(req.body)
         const recipeId = await this.recipesService.create(data, userId, file)
 
-        res.json({ data: recipeId })
+        res.status(201).json({ data: recipeId })
     }
 
     delete = async (req: Request, res: Response) => {

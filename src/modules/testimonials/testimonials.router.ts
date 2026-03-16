@@ -3,6 +3,6 @@ import { testimonialsController } from './testimonials.controller'
 
 const testimonialsRouter = Router()
 
-testimonialsRouter.get('/', testimonialsController.getIngredients)
+testimonialsRouter.get('/', testimonialsController.getAll)
 
 export default testimonialsRouter

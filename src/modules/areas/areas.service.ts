@@ -1,9 +1,8 @@
 import prisma from '../../prisma'
-
-import type { AreasResponseDto } from './dto/areas-response.dto'
+import type { AreaDto } from './dto/areas-response.dto'
 
 class AreasService {
-    async getAll(): Promise<AreasResponseDto> {
+    async getAll(): Promise<AreaDto[]> {
         return prisma.area.findMany()
     }
 }
