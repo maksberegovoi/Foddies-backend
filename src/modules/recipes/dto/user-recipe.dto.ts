@@ -1,6 +1,6 @@
 import { registry } from '../../../shared/api-docs/swagger'
 import { recipeDtoSchema } from './recipe.dto'
-import { z } from 'zod'
+import type { z } from 'zod'
 
 export const userRecipeDtoSchema = registry.register(
     'UserRecipeDto',

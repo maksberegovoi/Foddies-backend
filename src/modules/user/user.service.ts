@@ -1,12 +1,8 @@
 import prisma from '../../prisma'
-import type { User, Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { ApiError } from '../../shared/http/errors/api.error'
 
-import type {
-    UserDto,
-    UserProfileDto,
-    UserProfilePublicDto
-} from './dto/user.dto'
+import type { UserProfileDto, UserProfilePublicDto } from './dto/user.dto'
 import type { CreateUserDto } from './schemas/create-user.schema'
 import type { PaginationQuery } from './schemas/pagination-query.schema'
 import type { PaginationType } from '../../shared/http/types/pagination.type'

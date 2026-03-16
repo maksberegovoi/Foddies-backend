@@ -1,5 +1,5 @@
 import prisma from '../../prisma'
-import { AreaDto } from './dto/areas-response.dto'
+import type { AreaDto } from './dto/areas-response.dto'
 
 class AreasService {
     async getAll(): Promise<AreaDto[]> {

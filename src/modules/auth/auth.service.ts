@@ -5,8 +5,8 @@ import { ApiError } from '../../shared/http/errors/api.error'
 import type { SignUpDto } from './schemas/sign-up.schema'
 import { env } from '../../env'
 import type UserService from '../user/user.service'
-import type { UserDto, UserProfileDto } from '../user/dto/user.dto'
-import { SignInResponseDto } from './schemas/sign-in-response.schema'
+import type { UserProfileDto } from '../user/dto/user.dto'
+import type { SignInResponseDto } from './schemas/sign-in-response.schema'
 
 class AuthService {
     constructor(private readonly userService: UserService) {}

@@ -20,7 +20,7 @@ app.use('/api/v1', router)
 // Swagger
 if (isDev) {
     app.use('/api-docs', swaggerUi.serve)
-    app.use('/api-docs', (req: any, res: any, next: any) => {
+    app.use('/api-docs', (req, res, next) => {
         const swaggerDocument = getOpenApiDocumentation()
         swaggerUi.setup(swaggerDocument)(req, res, next)
     })

@@ -3,6 +3,8 @@ import {
     ApiValidationErrorSchema
 } from '../http/schemas/api-errors.schema'
 
+type ErrorCode = 400 | 401 | 403 | 404 | 500
+
 export const errorResponses = {
     unauthorized: {
         description: 'Unauthorized - Missing or invalid token',
@@ -25,16 +27,19 @@ export const errorResponses = {
         content: { 'application/json': { schema: ApiErrorSchema } }
     }
 }
+const codeToErrorMap = {
+    400: errorResponses.validation,
+    401: errorResponses.unauthorized,
+    403: errorResponses.forbidden,
+    404: errorResponses.notFound,
+    500: errorResponses.internal
+} as const
 
-export const withErrors = (codes: (400 | 401 | 403 | 404 | 500)[]) => {
-    const responses: any = {}
+export const withErrors = <T extends ErrorCode>(codes: T[]) => {
+    const responses = {} as { [K in T]: (typeof codeToErrorMap)[K] }
 
     codes.forEach((code) => {
-        if (code === 400) responses[400] = errorResponses.validation
-        if (code === 401) responses[401] = errorResponses.unauthorized
-        if (code === 403) responses[403] = errorResponses.forbidden
-        if (code === 404) responses[404] = errorResponses.notFound
-        if (code === 500) responses[500] = errorResponses.internal
+        responses[code] = codeToErrorMap[code]
     })
 
     return responses

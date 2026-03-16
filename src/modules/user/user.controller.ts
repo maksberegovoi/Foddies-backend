@@ -5,7 +5,7 @@ import type { ApiResponse } from '../../shared/http/types/api-response.type'
 import { paginationQuery } from './schemas/pagination-query.schema'
 import { idParamSchema } from '../../shared/http/schemas/idParam.schema'
 import type { ApiResponsePaginated } from '../../shared/http/types/api-response-paginated.type'
-import { UpdateAvatarResponseDto } from './dto/update-avatar-response.dto'
+import { type UpdateAvatarResponseDto } from './dto/update-avatar-response.dto'
 
 class UserController {
     constructor(private readonly userService: UserService) {}

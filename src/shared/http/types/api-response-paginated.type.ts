@@ -1,4 +1,4 @@
-import { PaginationTypeSchema, PaginationType } from './pagination.type'
+import { PaginationTypeSchema, type PaginationType } from './pagination.type'
 import { z } from 'zod'
 
 export type ApiResponsePaginated<T> = {

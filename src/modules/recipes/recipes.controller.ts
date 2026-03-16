@@ -8,7 +8,7 @@ import { type RecipeDto } from './dto/recipe.dto'
 import { createRecipeSchema } from './schemas/create-recipe.schema'
 import type { ApiResponsePaginated } from '../../shared/http/types/api-response-paginated.type'
 import { paginationQuery } from '../user/schemas/pagination-query.schema'
-import { UserRecipeDto } from './dto/user-recipe.dto'
+import type { UserRecipeDto } from './dto/user-recipe.dto'
 import { limitSchema } from '../../shared/http/schemas/pagination.schema'
 
 class RecipesController {

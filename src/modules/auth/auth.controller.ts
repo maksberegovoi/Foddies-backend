@@ -4,8 +4,8 @@ import { signUpSchema } from './schemas/sign-up.schema'
 import { signInSchema } from './schemas/sign-in.schema'
 import UserService from '../user/user.service'
 import type { ApiResponse } from '../../shared/http/types/api-response.type'
-import type { UserDto, UserProfileDto } from '../user/dto/user.dto'
-import { SignInResponseDto } from './schemas/sign-in-response.schema'
+import type { UserProfileDto } from '../user/dto/user.dto'
+import type { SignInResponseDto } from './schemas/sign-in-response.schema'
 
 class AuthController {
     constructor(private readonly authService: AuthService) {}

@@ -13,7 +13,7 @@ import {
     uploadToCloudinary
 } from '../../shared/fileUpload/cloudinary'
 import type { PaginationQuery } from '../user/schemas/pagination-query.schema'
-import { UserRecipeDto } from './dto/user-recipe.dto'
+import type { UserRecipeDto } from './dto/user-recipe.dto'
 
 export const recipeCardSelect = {
     id: true,
