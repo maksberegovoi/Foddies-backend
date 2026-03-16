@@ -55,7 +55,7 @@ class UserService {
         }
     }
 
-    async create(createUserDto: CreateUserDto): Promise<UserDto> {
+    async create(createUserDto: CreateUserDto): Promise<UserProfileDto> {
         const user = await prisma.user.create({
             data: createUserDto
         })
@@ -64,7 +64,11 @@ class UserService {
             id: user.id,
             email: user.email,
             name: user.name,
-            avatarURL: user.avatarURL
+            avatarURL: user.avatarURL,
+            totalFavoriteRecipes: 0,
+            totalFollowers: 0,
+            totalRecipes: 0,
+            totalFollowing: 0
         }
     }
 
@@ -85,16 +89,27 @@ class UserService {
         return this.toUserProfilePublicDto(user)
     }
 
-    async getUserByEmail({ email }: { email: string }): Promise<User | null> {
+    async getUserByEmail({
+        email
+    }: {
+        email: string
+    }): Promise<(UserProfileDto & { password: string }) | null> {
         const user = await prisma.user.findUnique({
-            where: { email }
+            where: { email },
+            select: {
+                ...userSelect,
+                password: true
+            }
         })
 
         if (!user) {
             return null
         }
 
-        return user
+        return {
+            ...this.toUserProfileDto(user),
+            password: user.password
+        }
     }
 
     async updateUserToken(userId: string, token: string | null) {

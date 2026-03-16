@@ -2,13 +2,18 @@ import {
     OpenAPIRegistry,
     OpenApiGeneratorV3
 } from '@asteasolutions/zod-to-openapi'
-import * as extendZod from '@asteasolutions/zod-to-openapi'
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import { z } from 'zod'
 import { env } from '../../env'
 
-extendZod.extendZodWithOpenApi(z)
-
+extendZodWithOpenApi(z)
+export { z }
 export const registry = new OpenAPIRegistry()
+registry.registerComponent('securitySchemes', 'bearerAuth', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT'
+})
 
 export function getOpenApiDocumentation() {
     const generator = new OpenApiGeneratorV3(registry.definitions)

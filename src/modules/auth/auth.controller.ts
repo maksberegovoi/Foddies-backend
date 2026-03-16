@@ -4,12 +4,16 @@ import { signUpSchema } from './schemas/sign-up.schema'
 import { signInSchema } from './schemas/sign-in.schema'
 import UserService from '../user/user.service'
 import type { ApiResponse } from '../../shared/http/types/api-response.type'
-import type { UserDto } from '../user/dto/user.dto'
+import type { UserDto, UserProfileDto } from '../user/dto/user.dto'
+import { SignInResponseDto } from './schemas/sign-in-response.schema'
 
 class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    signUp = async (req: Request, res: Response<ApiResponse<UserDto>>) => {
+    signUp = async (
+        req: Request,
+        res: Response<ApiResponse<UserProfileDto>>
+    ) => {
         const signUpDto = signUpSchema.parse(req.body)
         const user = await this.authService.signUpUser(signUpDto)
 
@@ -18,7 +22,7 @@ class AuthController {
 
     signIn = async (
         req: Request,
-        res: Response<ApiResponse<UserDto & { token: string }>>
+        res: Response<ApiResponse<SignInResponseDto>>
     ) => {
         const { email, password } = signInSchema.parse(req.body)
         const user = await this.authService.signInUser(email, password)

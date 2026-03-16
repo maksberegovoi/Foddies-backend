@@ -6,7 +6,8 @@ class CategoriesService {
         return prisma.category.findMany({
             select: {
                 id: true,
-                name: true
+                name: true,
+                description: true
             },
             orderBy: {
                 name: 'asc'

@@ -129,7 +129,7 @@ class RecipesService {
             ownerAvatarURL: recipe.owner.avatarURL
         }
     }
-    async getPopular(limit: number = 4): Promise<RecipeCardDto[]> {
+    async getPopular(limit: number): Promise<RecipeCardDto[]> {
         const recipes = await prisma.recipe.findMany({
             orderBy: {
                 favoritedBy: {

@@ -28,7 +28,7 @@ model User {
 }
 
 model Recipe {
-  id            String @id @default(cuid())
+  id            String  @id @default(cuid())
   title         String
   description   String
   instructions  String
@@ -57,9 +57,10 @@ model Recipe {
 }
 
 model Category {
-  id      String   @id @default(cuid())
-  name    String   @unique
-  recipes Recipe[]
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  recipes     Recipe[]
 }
 
 model Area {

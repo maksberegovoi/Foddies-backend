@@ -6,14 +6,13 @@ import { limitSchema } from '../../shared/http/schemas/pagination.schema'
 
 class TestimonialsController {
     constructor(private readonly testimonialsService: TestimonialsService) {}
-    getIngredients = async (
+    getAll = async (
         req: Request,
         res: Response<ApiResponse<TestimonialDto[]>>
     ) => {
         const { limit } = limitSchema.parse(req.query)
 
-        const testimonials =
-            await this.testimonialsService.getTestimonials(limit)
+        const testimonials = await this.testimonialsService.getAll(limit)
 
         res.json({ data: testimonials })
     }
