@@ -6,7 +6,7 @@ import type { RecipesQuerySchema } from './schemas/param-filters.schema'
 import type { Prisma } from '@prisma/client'
 import { recipeCardMapper } from './mapper/recipe-card.mapper'
 import type { CreateRecipeDto } from './schemas/create-recipe.schema'
-import { recipeFiltertingUtil } from './utils/recipe-filtering.util'
+import { recipeFilteringUtil } from './utils/recipe-filtering.util'
 import type { PaginationType } from '../../shared/http/types/pagination.type'
 import {
     buildResponsiveImageUrls,
@@ -39,7 +39,7 @@ class RecipesService {
     async getAll(
         query: RecipesQuerySchema
     ): Promise<{ items: RecipeCardDto[] } & PaginationType> {
-        const where = recipeFiltertingUtil(query)
+        const where = recipeFilteringUtil(query)
 
         const { limit, page } = query
         const skip = (page - 1) * limit

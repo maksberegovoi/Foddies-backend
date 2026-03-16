@@ -10,8 +10,8 @@ export const getRecipesQuerySchema = registry.register(
         authorId: z.string().optional(),
         limit: z.coerce.number().int().positive().optional().default(10),
         page: z.coerce.number().int().positive().optional().default(1),
-        categoryIds: stringToArray.optional(),
-        areaIds: stringToArray.optional(),
+        categoryId: z.string().optional(),
+        areaId: z.string().optional(),
         ingredientIds: stringToArray.optional()
     })
 )
