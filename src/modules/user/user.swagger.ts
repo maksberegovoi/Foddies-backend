@@ -26,7 +26,7 @@ registry.registerPath({
                 }
             }
         },
-        ...withErrors([401, 500])
+        ...withErrors([401, 404, 500])
     }
 })
 

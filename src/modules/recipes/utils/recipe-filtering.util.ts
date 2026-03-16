@@ -1,28 +1,29 @@
 import type { Prisma } from '@prisma/client'
 import type { RecipesQuerySchema } from '../schemas/param-filters.schema'
 
-export const recipeFiltertingUtil = (params: RecipesQuerySchema) => {
+export const recipeFilteringUtil = (params: RecipesQuerySchema) => {
     const where: Prisma.RecipeWhereInput = {}
 
     if (params.authorId) {
         where.ownerId = params.authorId
     }
 
-    if (params.categoryIds?.length) {
-        where.categoryId = { in: params.categoryIds }
+    if (params.categoryId) {
+        where.categoryId = params.categoryId
     }
 
-    if (params.areaIds?.length) {
-        where.areaId = { in: params.areaIds }
+    if (params.areaId) {
+        where.areaId = params.areaId
     }
 
-    // TODO: OR / AND ?
     if (params.ingredientIds?.length) {
-        where.ingredients = {
-            some: {
-                ingredientId: { in: params.ingredientIds }
+        where.AND = params.ingredientIds.map((id) => ({
+            ingredients: {
+                some: {
+                    ingredientId: id
+                }
             }
-        }
+        }))
     }
 
     return where
