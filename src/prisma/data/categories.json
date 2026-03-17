@@ -1,0 +1,107 @@
+[
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f8a"
+        },
+        "name": "Seafood",
+        "description": "Dive into ocean-inspired flavors where freshness and delicate textures create a refined and vibrant culinary experience."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f8b"
+        },
+        "name": "Lamb",
+        "description": "Discover rich and aromatic lamb dishes where tender meat meets deep, savory flavors and timeless culinary traditions."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f8c"
+        },
+        "name": "Starter",
+        "description": "Begin your meal with light and enticing starters designed to awaken the appetite and set the tone for the courses ahead."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f8d"
+        },
+        "name": "Chicken",
+        "description": "Enjoy versatile chicken dishes crafted with balanced spices and comforting flavors that suit every palate."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f8e"
+        },
+        "name": "Beef",
+        "description": "Indulge in bold and hearty beef creations where deep flavor, tenderness, and culinary craftsmanship come together."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f8f"
+        },
+        "name": "Dessert",
+        "description": "Go on a taste journey where every bite is a sweet expression of creativity and refined gastronomic pleasure."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f90"
+        },
+        "name": "Vegan",
+        "description": "Explore vibrant plant-based dishes where natural ingredients transform into wholesome and inspiring culinary creations."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f91"
+        },
+        "name": "Pork",
+        "description": "Experience savory pork dishes where rich textures and balanced seasoning deliver comforting and satisfying flavors."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f92"
+        },
+        "name": "Vegetarian",
+        "description": "Discover flavorful vegetarian plates where fresh ingredients and creative combinations celebrate the beauty of meat-free cuisine."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f93"
+        },
+        "name": "Miscellaneous",
+        "description": "A collection of unique and diverse dishes that bring together unexpected flavors and creative culinary ideas."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f94"
+        },
+        "name": "Pasta",
+        "description": "Enjoy comforting pasta dishes where silky sauces and perfectly cooked noodles create timeless Italian-inspired harmony."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f95"
+        },
+        "name": "Breakfast",
+        "description": "Start the day with warm and energizing breakfast creations designed to bring comfort and flavor to the morning table."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f96"
+        },
+        "name": "Side",
+        "description": "Complement your main course with carefully crafted side dishes that add balance, texture, and depth to every meal."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f97"
+        },
+        "name": "Goat",
+        "description": "Discover distinctive goat dishes where tender meat and bold seasoning create a rich and memorable flavor experience."
+    },
+    {
+        "_id": {
+            "$oid": "6462a6cd4c3d0ddd28897f98"
+        },
+        "name": "Soup",
+        "description": "Warm up with comforting soups where slow-simmered ingredients build deep aromas and nourishing flavors."
+    }
+]

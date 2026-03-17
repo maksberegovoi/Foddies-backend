@@ -20,7 +20,7 @@ export class ApiError extends Error {
         return new ApiError(500, message)
     }
 
-    static unauthorized(message: string) {
+    static unauthorized(message: string = 'Unauthorized') {
         return new ApiError(401, message)
     }
 

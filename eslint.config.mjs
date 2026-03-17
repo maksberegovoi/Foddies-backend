@@ -6,7 +6,7 @@ export default tseslint.config(
     ...tseslint.configs.recommended,
 
     {
-        ignores: ['dist', 'node_modules']
+        ignores: ['dist', 'node_modules', 'src/prisma/seed.ts']
     },
 
     {
@@ -28,7 +28,7 @@ export default tseslint.config(
             ],
             '@typescript-eslint/no-unused-vars': [
                 'error',
-                { argsIgnorePattern: '^_' }
+                { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
             ]
         }
     }
