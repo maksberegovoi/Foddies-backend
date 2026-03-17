@@ -6,7 +6,11 @@ import type { SignUpDto } from './schemas/sign-up.schema'
 import { env } from '../../env'
 import type UserService from '../user/user.service'
 import type { UserProfileDto } from '../user/dto/user.dto'
-import type { SignInResponseDto } from './schemas/sign-in-response.schema'
+
+type SignInResult = {
+    user: UserProfileDto
+    token: string
+}
 
 class AuthService {
     constructor(private readonly userService: UserService) {}
@@ -20,10 +24,7 @@ class AuthService {
         })
     }
 
-    async signInUser(
-        email: string,
-        password: string
-    ): Promise<SignInResponseDto> {
+    async signInUser(email: string, password: string): Promise<SignInResult> {
         const user = await this.userService.getUserByEmail({ email })
 
         if (!user || !(await bcrypt.compare(password, user.password)))
@@ -36,7 +37,7 @@ class AuthService {
 
         const { password: _, ...profile } = user
         return {
-            ...profile,
+            user: profile,
             token
         }
     }
