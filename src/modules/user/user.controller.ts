@@ -25,7 +25,7 @@ class UserController {
         req: Request,
         res: Response<ApiResponse<UserProfilePublicDto>>
     ) => {
-        const userId = req.user.id
+        const { id: userId } = idParamSchema.parse(req.params)
         const user = await this.userService.getUserById({ userId })
 
         res.json({ data: user })

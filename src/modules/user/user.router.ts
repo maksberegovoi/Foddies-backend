@@ -5,10 +5,10 @@ import authenticateMiddleware from '../../shared/http/middlewares/authenticate.m
 
 const userRouter = Router()
 
-userRouter.use(authenticateMiddleware)
-
-userRouter.get('/current', userController.current)
 userRouter.get('/:id', userController.getUserById)
+
+userRouter.use(authenticateMiddleware)
+userRouter.get('/current', userController.current)
 userRouter.get('/:id/followers', userController.followers)
 userRouter.get('/:id/following', userController.following)
 userRouter.post('/:id/follow', userController.follow)
