@@ -122,7 +122,7 @@ class UserService {
         })
 
         if (!user) {
-            throw ApiError.notFound('User not found')
+            throw ApiError.unauthorized('Session invalid or user no longer exists')
         }
 
         return this.toUserProfileDto(user)
