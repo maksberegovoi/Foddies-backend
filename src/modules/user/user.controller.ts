@@ -25,8 +25,9 @@ class UserController {
         req: Request,
         res: Response<ApiResponse<UserProfilePublicDto>>
     ) => {
-        const userId = req.user.id
-        const user = await this.userService.getUserById({ userId })
+        const currentUserId = req.user.id
+        const { id: userId } = idParamSchema.parse(req.params)
+        const user = await this.userService.getUserById(userId, currentUserId)
 
         res.json({ data: user })
     }
@@ -35,10 +36,12 @@ class UserController {
         req: Request,
         res: Response<ApiResponsePaginated<UserProfilePublicDto>>
     ) => {
+        const currentUserId = req.user.id
         const query = paginationQuery.parse(req.query)
         const { id: userId } = idParamSchema.parse(req.params)
         const { items: data, ...meta } = await this.userService.followers(
             query,
+            currentUserId,
             userId
         )
 
@@ -49,11 +52,13 @@ class UserController {
         req: Request,
         res: Response<ApiResponsePaginated<UserProfilePublicDto>>
     ) => {
+        const currentUserId = req.user.id
         const query = paginationQuery.parse(req.query)
         const { id: userId } = idParamSchema.parse(req.params)
 
         const { items: data, ...meta } = await this.userService.following(
             query,
+            currentUserId,
             userId
         )
 

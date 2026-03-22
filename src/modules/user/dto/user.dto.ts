@@ -21,10 +21,14 @@ export const userProfileDtoSchema = registry.register(
 )
 export const userProfilePublicDtoSchema = registry.register(
     'UserProfilePublicDto',
-    userProfileDtoSchema.omit({
-        totalFavoriteRecipes: true,
-        totalFollowing: true
-    })
+    userProfileDtoSchema
+        .omit({
+            totalFavoriteRecipes: true,
+            totalFollowing: true
+        })
+        .extend({
+            isFollowing: z.boolean()
+        })
 )
 
 export type UserDto = z.infer<typeof userDtoSchema>

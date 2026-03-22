@@ -42,10 +42,13 @@ class UserService {
         }
     }
 
-    private toUserProfilePublicDto(user: UserWithCounts): UserProfilePublicDto {
+    private toUserProfilePublicDto(
+        user: UserWithCounts & { followers: { id: string }[] }
+    ): UserProfilePublicDto {
         const { _count, ...userData } = user
         return {
             ...userData,
+            isFollowing: userData.followers.length > 0,
             totalRecipes: _count.recipes,
             totalFollowers: _count.followers
         }
@@ -68,14 +71,24 @@ class UserService {
         }
     }
 
-    async getUserById({
-        userId
-    }: {
-        userId: string
-    }): Promise<UserProfilePublicDto> {
+    async getUserById(
+        userId: string,
+        currentUserId: string
+    ): Promise<UserProfilePublicDto> {
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: userSelect
+            select: {
+                ...userSelect,
+                followers: {
+                    where: {
+                        id: currentUserId
+                    },
+                    select: {
+                        id: true
+                    },
+                    take: 1
+                }
+            }
         })
 
         if (!user) {
@@ -122,7 +135,9 @@ class UserService {
         })
 
         if (!user) {
-            throw ApiError.notFound('User not found')
+            throw ApiError.unauthorized(
+                'Session invalid or user no longer exists'
+            )
         }
 
         return this.toUserProfileDto(user)
@@ -180,6 +195,7 @@ class UserService {
 
     async followers(
         query: PaginationQuery,
+        currentUserId: string,
         userId: string
     ): Promise<{ items: UserProfilePublicDto[] } & PaginationType> {
         const { limit, page } = query
@@ -189,7 +205,18 @@ class UserService {
             where: { id: userId },
             select: {
                 followers: {
-                    select: userSelect,
+                    select: {
+                        ...userSelect,
+                        followers: {
+                            where: {
+                                id: currentUserId
+                            },
+                            select: {
+                                id: true
+                            },
+                            take: 1
+                        }
+                    },
                     skip,
                     take: limit,
                     orderBy: { createdAt: 'desc' }
@@ -212,6 +239,7 @@ class UserService {
 
     async following(
         query: PaginationQuery,
+        currentUserId: string,
         userId: string
     ): Promise<{ items: UserProfilePublicDto[] } & PaginationType> {
         const { limit, page } = query
@@ -221,7 +249,18 @@ class UserService {
             where: { id: userId },
             select: {
                 following: {
-                    select: userSelect,
+                    select: {
+                        ...userSelect,
+                        followers: {
+                            where: {
+                                id: currentUserId
+                            },
+                            select: {
+                                id: true
+                            },
+                            take: 1
+                        }
+                    },
                     skip,
                     take: limit,
                     orderBy: { createdAt: 'desc' }

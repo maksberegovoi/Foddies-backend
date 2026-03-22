@@ -4,7 +4,6 @@ import { uploadHandler } from '../../shared/http/middlewares/upload-handler.midd
 import authenticateMiddleware from '../../shared/http/middlewares/authenticate.middleware'
 
 const userRouter = Router()
-
 userRouter.use(authenticateMiddleware)
 
 userRouter.get('/current', userController.current)
